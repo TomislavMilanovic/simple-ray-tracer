@@ -138,7 +138,7 @@ Color trace(Ray &r, const glm::uint16 &lvl, const Scene &scene)
             Light currentLight = scene.lights[i];
 
             glm::vec3 dist = currentLight.pos - newStart;
-            if(glm::dot(n, dist) <= 0.0f) continue; //ako nikako nema svjetla (s wikipedije)
+            if(glm::dot(n, dist) <= 0.0f) continue; //ako nikako nema svjetla
 
             Ray lightRay(newStart, glm::normalize(dist));
 
@@ -165,8 +165,8 @@ Color trace(Ray &r, const glm::uint16 &lvl, const Scene &scene)
         coef *= currentMat.reflection;
 
         //odbijena zraka
+        r.dir = glm::reflect(r.dir, n);
         r.start = newStart;
-        r.dir = r.dir - ((2.0f * glm::dot(r.dir, n)) * n);
         level--;
 
     }while((coef > 0.0f) && (level > 0));
@@ -201,12 +201,12 @@ int main()
 
     Scene scene;
 
-    scene.materials.push_back(Material(Color(1.0f, 0.0f, 0.0f), 0.2f)); //red
-    scene.materials.push_back(Material(Color(0.0f, 1.0f, 0.0f), 0.5f)); //green
-    scene.materials.push_back(Material(Color(0.0f, 0.0f, 1.0f), 0.9f)); //blue
+    scene.materials.push_back(Material(Color(1.0f, 0.0f, 0.0f), 0.5f)); 
+    scene.materials.push_back(Material(Color(0.0f, 1.0f, 0.0f), 1.0f)); 
+    scene.materials.push_back(Material(Color(0.0f, 1.0f, 1.0f), 0.0f)); 
 
     scene.spheres.push_back(Sphere(glm::vec3(200.0f, 300.0f, 0.0f), 100.0f, scene.materials[0]));
-    scene.spheres.push_back(Sphere(glm::vec3(400.0f, 400.0f, 0.0f), 100.0f, scene.materials[1]));
+    scene.spheres.push_back(Sphere(glm::vec3(400.0f, 400.0f, 0.0f), 50.0f, scene.materials[1]));
     scene.spheres.push_back(Sphere(glm::vec3(500.0f, 140.0f, 0.0f), 100.0f, scene.materials[2]));
 
     scene.lights.push_back(Light(glm::vec3(0.0f, 240.0f, -100.0f), Color(1.0f, 1.0f, 1.0f)));
@@ -218,19 +218,6 @@ int main()
     render(width, height, level, img, scene);
 
     saveppm("test2.ppm", img, width, height);
-
-    /*std::vector< glm::vec3 > img(width * height);
-
-    for(glm::uint16 i = 0; i < height; ++i)
-    {
-        for(glm::uint16 j = 0; j < width; ++j)
-        {
-            if(i <= height/2)
-                img[i * width + j] = glm::vec3(255.0f, 255.0f, 255.0f);
-            else
-                img[i * width + j] = glm::vec3(56.0f, 88.0f, 123.0f);
-        }
-    }*/
 
    return 0;
 }
