@@ -4,68 +4,69 @@
 #include <vector>
 #include <limits>
 
+#include <typeinfo>
+
 #include "glm/glm.hpp"
 
 using namespace std;
 
-class Color
-{
-public:
-    glm::float32 r() const {return c.x;}
-    glm::float32 g() const {return c.y;}
-    glm::float32 b() const {return c.z;}
+typedef glm::vec3 Vector3f;
+typedef glm::vec3 Color;
 
-    Color() : c(glm::vec3()) {}
-    Color(const glm::float32 &r, const glm::float32 &g, const glm::float32 &b) {c = glm::vec3(r, g, b);}
-private:
-    glm::vec3 c;
-};
 class Light
 {
 public:
-    glm::vec3 pos;
+    Vector3f pos;
     Color intensity;
 
-    Light(const glm::vec3 &p, const Color &intens) : pos(p) , intensity(intens){}
+    Light(const Vector3f &p, const Color &intens) : pos(p) , intensity(intens){}
 };
 class Material
 {
 public:
     Color diffuse;
-    glm::float32 reflection;
+    float reflection;
 
-    Material(const Color &d, const glm::float32 &refl) : diffuse(d), reflection(refl) {}
+    Material(const Color &d, const float &refl) : diffuse(d), reflection(refl) {}
 };
 class Ray
 {
 public:
-    Ray() : start(glm::vec3()), dir(glm::vec3()) {}
-    Ray(const glm::vec3 &st, const glm::vec3 &d) : start(st), dir(d) {/*empty*/}
-    glm::vec3 start, dir;
+    Ray() : start(Vector3f()), dir(Vector3f()) {}
+    Ray(const Vector3f &st, const Vector3f &d) : start(st), dir(d) {/*empty*/}
+    Vector3f start, dir;
 };
-class Sphere
+class SolidObject
 {
 public:
+     SolidObject(const Vector3f &pos, const Material &mat) : position(pos), material(mat) {/*empty*/}
+     virtual bool intersect(const Ray &ray, float &t) const = 0;
+     Vector3f position;
+     Material material;
+};
 
-    Sphere(const glm::vec3 &pos, const glm::float32 &rad, const Material &mat) : position(pos), radius(rad), material(mat) {/*empty*/}
+class Sphere : public SolidObject
+{
+public:
+    Sphere(const Vector3f &pos, const float &rad, const Material &mat) : SolidObject(pos, mat), radius(rad) {/*empty*/}
 
-    bool intersect(const Ray &ray, glm::float32 &t) const
+    bool intersect(const Ray &ray, float &t) const
     {
         bool return_value = false;
 
-        glm::float32 A = glm::dot(ray.dir, ray.dir);
-        glm::vec3 dist = ray.start - position;
-        glm::float32 B = 2.0f * glm::dot(ray.dir, dist);
-        glm::float32 C = glm::dot(dist, dist) - (radius * radius);
-        glm::float32 discr = B * B - 4.0f * A * C;
+        float A = glm::dot(ray.dir, ray.dir);
+        Vector3f dist = ray.start - position;
+        float B = 2.0f * glm::dot(ray.dir, dist);
+        float C = glm::dot(dist, dist) - (radius * radius);
+        float discr = B * B - 4.0f * A * C;
 
         if(discr < 0.0f)
             return_value = false;
         else
         {
-            glm::float32 sqrtdiscr = glm::sqrt(discr);
-            glm::float32 t0 = (-B + sqrtdiscr) / (2.0f);
-            glm::float32 t1 = (-B - sqrtdiscr) / (2.0f);
+            float sqrtdiscr = glm::sqrt(discr);
+            float t0 = (-B + sqrtdiscr) / (2.0f);
+            float t1 = (-B - sqrtdiscr) / (2.0f);
 
             t0 = glm::min(t0, t1);
 
@@ -79,15 +80,41 @@ public:
 
         return return_value;
     }
-
-    glm::vec3 position;
-    glm::float32 radius;
-    Material material;
+private:
+    float radius;
 };
+class Plane : public SolidObject
+{
+public:
+    Plane(const Vector3f &pos, const Vector3f &n, const Material &mat) : SolidObject(pos, mat), normal(n) {/*empty*/}
+    bool intersect(const Ray &ray, float &t) const
+    {
+        float denom = glm::dot(normal, ray.dir);
+
+        if(denom > 1e-6f)
+        {
+            Vector3f tmp = position - ray.start;
+            float t0 = glm::dot(tmp, normal) / denom;
+
+            if((t0 > 0.0f) && (t0 < t))
+            {
+                t = t0;
+                return true;
+            }
+            else return false;
+        }
+
+        return false;
+    }
+
+private:
+    Vector3f normal;
+};
+
 class Scene
 {
 public:
-    std::vector<Sphere> spheres;
+    std::vector<SolidObject*> objects;
     std::vector<Light> lights;
     std::vector<Material> materials;
 };
@@ -101,7 +128,7 @@ void saveppm(const std::string &filename, const std::vector <Color> &img, const 
 
     for(glm::uint32 i = 0; i < width * height; ++i)
     {
-        file << (unsigned char)img[i].r() << (unsigned char)img[i].g() << (unsigned char)img[i].b();
+        file << (unsigned char)img[i].r << (unsigned char)img[i].g << (unsigned char)img[i].b;
     }
 
     file.close();
@@ -109,45 +136,50 @@ void saveppm(const std::string &filename, const std::vector <Color> &img, const 
 
 Color trace(Ray &r, const glm::uint16 &lvl, const Scene &scene)
 {
-    glm::float32 red = 0.0f;
-    glm::float32 green = 0.0f;
-    glm::float32 blue = 0.0f;
+    float red = 0.0f;
+    float green = 0.0f;
+    float blue = 0.0f;
 
-    glm::float32 coef = 1.0f;
+    float coef = 1.0f;
     glm::uint16 level = lvl;
 
     do
     {
-        glm::float32 t = std::numeric_limits<glm::float32>::infinity();
-        glm::int16 currentSphere = -1;
+        float t = std::numeric_limits<float>::infinity();
+        glm::int16 currentObject = -1;
 
-        for(glm::uint16 i = 0; i < scene.spheres.size(); ++i)
-            if(scene.spheres[i].intersect(r, t)) currentSphere = i;
-        if(currentSphere == -1) break;
+        for(glm::uint16 i = 0; i < scene.objects.size(); ++i)
+            if(scene.objects[i]->intersect(r, t)) currentObject = i;
+        if(currentObject == -1) break;
 
-        glm::vec3 newDir = t * r.dir; // p = t*d + p0
-        glm::vec3 newStart = r.start + newDir; //tocka na sferi
+        Vector3f newDir = t * r.dir; // p = t*d + p0
+        Vector3f newStart = r.start + newDir; //tocka na objektu
 
-        glm::vec3 n = newStart - scene.spheres[currentSphere].position;
+        Vector3f n = newStart - scene.objects[currentObject]->position;
         n = glm::normalize(n);
 
-        Material currentMat = scene.spheres[currentSphere].material;
+        /*if(typeid(*scene.objects[currentObject]).name() == typeid(*scene.objects[2]).name())
+            n = -glm::normalize(Vector3f(0.0f, 1.0f, 1.0f));*/
+
+        //cout << n.x << " " << n.y << " " << n.z << " "<< endl;
+
+        Material currentMat = scene.objects[currentObject]->material;
 
         for(glm::uint16 i = 0; i < scene.lights.size(); ++i)
         {
             Light currentLight = scene.lights[i];
 
-            glm::vec3 dist = currentLight.pos - newStart;
+            Vector3f dist = currentLight.pos - newStart;
             if(glm::dot(n, dist) <= 0.0f) continue; //ako nikako nema svjetla
 
             Ray lightRay(newStart, glm::normalize(dist));
 
             bool inShadow = false;
-            t = std::numeric_limits<glm::float32>::infinity();
+            t = std::numeric_limits<float>::infinity();
 
-            for(glm::uint16 j = 0; j < scene.spheres.size(); ++j)
+            for(glm::uint16 j = 0; j < scene.objects.size(); ++j)
             {
-                if(scene.spheres[j].intersect(lightRay, t))
+                if(scene.objects[j]->intersect(lightRay, t))
                 {
                     inShadow = true;
                     break;
@@ -155,10 +187,10 @@ Color trace(Ray &r, const glm::uint16 &lvl, const Scene &scene)
             }
             if(!inShadow)
             {
-                glm::float32 lambert = glm::dot(lightRay.dir, n) * coef;
-                red += lambert * currentLight.intensity.r() * currentMat.diffuse.r();
-                green += lambert * currentLight.intensity.g() * currentMat.diffuse.g();
-                blue += lambert * currentLight.intensity.b() * currentMat.diffuse.b();
+                float lambert = glm::dot(lightRay.dir, n) * coef;
+                red += lambert * currentLight.intensity.r * currentMat.diffuse.r;
+                green += lambert * currentLight.intensity.g * currentMat.diffuse.g;
+                blue += lambert * currentLight.intensity.b * currentMat.diffuse.b;
             }
         }
 
@@ -181,16 +213,33 @@ void render(const glm::uint16 &width, const glm::uint16 &height, const glm::uint
         for(glm::uint16 x = 0; x < width; ++x)
         {
             Ray r;
+            Color avg;
+            int count = 0;
 
-            r.start.x = x;
-            r.start.y = y;
-            r.start.z = -2000.0f;
+            for(float w = -0.9f; w <= 0.9f; w += 0.2f)
+            {
+                r.start.x = x + w;
+                r.start.y = y + w;
+                r.start.z = -2000.0f;
 
-            r.dir.x = 0.0f;
-            r.dir.y = 0.0f;
-            r.dir.z = 1.0f;
+                r.dir.x = 0.0f;
+                r.dir.y = 0.0f;
+                r.dir.z = 1.0f;
 
-            img[y*width + x] = trace(r, level, scene);
+                count++;
+
+                Color tmp = trace(r, level, scene);
+
+                avg.r += tmp.r;
+                avg.g += tmp.g;
+                avg.b += tmp.b;
+            }
+
+            avg.r /= (float)count;
+            avg.g /= (float)count;
+            avg.b /= (float)count;
+
+            img[y*width + x] = avg;
         }
     }
 }
@@ -201,23 +250,28 @@ int main()
 
     Scene scene;
 
-    scene.materials.push_back(Material(Color(1.0f, 0.0f, 0.0f), 0.5f)); 
+    scene.materials.push_back(Material(Color(1.0f, 0.0f, 0.0f), 0.5f));
     scene.materials.push_back(Material(Color(0.0f, 1.0f, 0.0f), 1.0f)); 
     scene.materials.push_back(Material(Color(0.0f, 1.0f, 1.0f), 0.0f)); 
 
-    scene.spheres.push_back(Sphere(glm::vec3(200.0f, 300.0f, 0.0f), 100.0f, scene.materials[0]));
-    scene.spheres.push_back(Sphere(glm::vec3(400.0f, 400.0f, 0.0f), 50.0f, scene.materials[1]));
-    scene.spheres.push_back(Sphere(glm::vec3(500.0f, 140.0f, 0.0f), 100.0f, scene.materials[2]));
+    scene.objects.push_back(new Sphere(Vector3f(200.0f, 300.0f, 0.0f), 75.0f, scene.materials[0]));
+    scene.objects.push_back(new Sphere(Vector3f(500.0f, 300.0f, 0.0f), 75.0f, scene.materials[2]));
+    scene.objects.push_back(new Plane(Vector3f(350.0f, -450.0f, 975.0f), glm::normalize(Vector3f(0.0f, 1.0f, 1.0f)), scene.materials[2]));
 
-    scene.lights.push_back(Light(glm::vec3(0.0f, 240.0f, -100.0f), Color(1.0f, 1.0f, 1.0f)));
-    scene.lights.push_back(Light(glm::vec3(3200.0f, 3000.0f, -1000.0f), Color(0.6f, 0.7f, 1.0f)));
-    scene.lights.push_back(Light(glm::vec3(600.0f, 0.0f, -100.0f), Color(0.3f, 0.5f, 1.0f)));
+    //scene.objects.push_back(new Plane(Vector3f(2000.0f, 375.0f, 50.0f), glm::normalize(Vector3f(0.0f, 1.0f, 1.0f)), scene.materials[2]));
+
+    /*Vector3f n = glm::normalize(Vector3f(0.0f, 1.0f, 1.0f));
+    cout << n.x << " " << n.y << " " << n.z << " "<< endl;*/
+
+    //scene.lights.push_back(Light(Vector3f(-100.0f, -375.0f, -600.0f), Color(1.0f, 1.0f, 1.0f)));
+
+    scene.lights.push_back(Light(Vector3f(350.0f, -375.0f, -1200.0f), Color(1.0f, 1.0f, 1.0f)));
 
     std::vector<Color> img(width * height);
 
     render(width, height, level, img, scene);
 
-    saveppm("test2.ppm", img, width, height);
+    saveppm("scene.ppm", img, width, height);
 
    return 0;
 }

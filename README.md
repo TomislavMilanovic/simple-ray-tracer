@@ -22,4 +22,8 @@ Free book for Ray Tracing:
 
 http://www.cosinekitty.com/raytrace/contents.html
 
+Ray-plane intersection
+
+https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-plane-and-ray-disk-intersection
+
 
