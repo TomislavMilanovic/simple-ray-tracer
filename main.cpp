@@ -7,6 +7,7 @@
 #include <typeinfo>
 
 #include "glm/glm.hpp"
+#include "lodepng/lodepng.h"
 
 using namespace std;
 
@@ -132,6 +133,32 @@ void saveppm(const std::string &filename, const std::vector <Color> &img, const 
     }
 
     file.close();
+}
+void savepng(const std::string &filename, const std::vector <Color> &img, const glm::uint32 &width, const glm::uint32 &height)
+{
+    const unsigned char ALPHA = 255;
+
+    //0 - 255
+    //0x00 - 0xff - 4B po boji
+    const unsigned BYTES_PER_PIXEL = 4;
+    const unsigned TEMP_BUFFER_SIZE = width * height * BYTES_PER_PIXEL;
+
+    std::vector<unsigned char> tempBuffer(TEMP_BUFFER_SIZE);
+    unsigned int bufferIndex = 0;
+
+    for(glm::uint16 y = 0; y < height; ++y)
+    {
+        for(glm::uint16 x = 0; x < width; ++x)
+        {
+            tempBuffer[bufferIndex++] = img[y*width + x].r;
+            tempBuffer[bufferIndex++] = img[y*width + x].g;
+            tempBuffer[bufferIndex++] = img[y*width + x].b;
+            tempBuffer[bufferIndex++] = ALPHA;
+        }
+
+    }
+
+    lodepng::encode(filename, tempBuffer, width, height);
 }
 
 Color trace(Ray &r, const glm::uint16 &lvl, const Scene &scene)
@@ -271,9 +298,10 @@ int main()
 
     render(width, height, level, img, scene);
 
-    saveppm("scene.ppm", img, width, height);
+    //saveppm("scene.ppm", img, width, height);
+    savepng("scene.png", img, width, height);
 
-   return 0;
+    return 0;
 }
 
 
