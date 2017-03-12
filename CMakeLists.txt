@@ -4,8 +4,10 @@ project(simple_ray_tracer)
 cmake_minimum_required(VERSION 2.8)
 
 file(GLOB_RECURSE SRC_LIST
-    lodepng/lodepng.h
-    lodepng/lodepng.cpp
+    lib/lodepng/lodepng.h
+    lib/lodepng/lodepng.cpp
+    src/*.h
+    src/*.cpp
 )
 
 aux_source_directory(. SRC_LIST)
