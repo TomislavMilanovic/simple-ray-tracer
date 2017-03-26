@@ -1,4 +1,3 @@
-
 #include <fstream>
 #include "scene.h"
 
@@ -49,9 +48,7 @@ namespace raytracer
     }
     Color Scene::trace(Ray &r, const glm::uint16 &lvl)
     {
-        float red = 0.0f;
-        float green = 0.0f;
-        float blue = 0.0f;
+        Color result;
 
         float coef = 1.0f;
         glm::uint16 level = lvl;
@@ -88,7 +85,7 @@ namespace raytracer
                 Ray lightRay(newStart, glm::normalize(dist));
 
                 bool inShadow = false;
-                t = std::numeric_limits<float>::infinity();
+                t = std::numeric_limits<float>::infinity(); //zamijeni infinity sa nekim def
 
                 for(glm::uint16 j = 0; j < objects.size(); ++j)
                 {
@@ -101,9 +98,9 @@ namespace raytracer
                 if(!inShadow)
                 {
                     float lambert = glm::dot(lightRay.dir, n) * coef;
-                    red += lambert * currentLight.intensity.r * currentMat.diffuse.r;
-                    green += lambert * currentLight.intensity.g * currentMat.diffuse.g;
-                    blue += lambert * currentLight.intensity.b * currentMat.diffuse.b;
+                    result.r += lambert * currentLight.intensity.r * currentMat.diffuse.r;
+                    result.g += lambert * currentLight.intensity.g * currentMat.diffuse.g;
+                    result.b += lambert * currentLight.intensity.b * currentMat.diffuse.b;
                 }
             }
 
@@ -116,8 +113,46 @@ namespace raytracer
 
         }while((coef > 0.0f) && (level > 0));
 
-        return Color(glm::min(red*255.0f, 255.0f), glm::min(green*255.0f, 255.0f), glm::min(blue*255.0f, 255.0f));
+        return Color(glm::min(result.r*255.0f, 255.0f), glm::min(result.g*255.0f, 255.0f), glm::min(result.b*255.0f, 255.0f));
     }
+
+    Color Scene::supersampling_grid(const int &n, const float &y, const float &x, const glm::uint16 &level)
+    {
+        Color avg;
+        Ray r;
+
+        float step = (n % 2 == 0) ? (0.5f * (1.0f/(float)n)) : ((1.0f/(float)n));
+
+        if(n % 2 != 0)
+            step /= 2.0f;
+
+        for(float i = -0.5f + step; i < 0.5f; i += step*2.0f)
+        {
+            for(float j = -0.5f +  step; j < 0.5f; j += step*2.0f)
+            {
+                r.start.x = x + i;
+                r.start.y = y + j;
+                r.start.z = -2000.0f;
+
+                r.dir.x = 0.0f;
+                r.dir.y = 0.0f;
+                r.dir.z = 1.0f;
+
+                Color tmp = trace(r, level);
+
+                avg.r += tmp.r;
+                avg.g += tmp.g;
+                avg.b += tmp.b;
+            }
+        }
+
+        avg.r /= n*n;
+        avg.g /= n*n;
+        avg.b /= n*n;
+
+        return avg;
+    }
+
     void Scene::render(const glm::uint16 &width, const glm::uint16 &height, const glm::uint16 &level)
     {
         img.resize(width * height);
@@ -126,38 +161,11 @@ namespace raytracer
         {
             for(glm::uint16 x = 0; x < width; ++x)
             {
-                Ray r;
-                Color avg;
-                int count = 0;
-
-                for(float w = -0.9f; w <= 0.9f; w += 0.2f)
-                {
-                    r.start.x = x + w;
-                    r.start.y = y + w;
-                    r.start.z = -2000.0f;
-
-                    r.dir.x = 0.0f;
-                    r.dir.y = 0.0f;
-                    r.dir.z = 1.0f;
-
-                    count++;
-
-                    Color tmp = trace(r, level);
-
-                    avg.r += tmp.r;
-                    avg.g += tmp.g;
-                    avg.b += tmp.b;
-                }
-
-                avg.r /= (float)count;
-                avg.g /= (float)count;
-                avg.b /= (float)count;
-
-                img[y*width + x] = avg;
+                img[y*width + x] = supersampling_grid(5, y, x, level);
             }
         }
 
-        savepng("scene.png", width, height);
+        savepng("scene3.png", width, height);
 
         img.clear();
     }
