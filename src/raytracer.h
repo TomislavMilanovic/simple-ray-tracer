@@ -1,13 +1,18 @@
 #ifndef RAYTRACER_H
 #define RAYTRACER_H
 
+#include <vector>
+
 //promijeniti pristup
 #include "../lib/glm/glm.hpp"
 
 namespace raytracer
 {
+    struct Intersection;
+
     typedef glm::vec3 Vector3f;
     typedef glm::vec3 Color;
+    typedef std::vector<Intersection> intersectionList;
 
     class Ray
     {
@@ -36,16 +41,23 @@ namespace raytracer
     {
     public:
          SolidObject(const Vector3f &pos, const Material &mat) : position(pos), material(mat) {}
-         virtual bool intersect(const Ray &ray, float &t) const = 0;
+         virtual bool intersect(const Ray &ray, intersectionList &list) const = 0;
          Vector3f position;
          Material material;
     };
+    struct Intersection
+    {
+        glm::float32 distance;
+        Vector3f point;
+        Vector3f normal;
+        const SolidObject *solid;
+    };
+
     class Sphere : public SolidObject
     {
     public:
         Sphere(const Vector3f &pos, const float &rad, const Material &mat) : SolidObject(pos, mat), radius(rad) {/*empty*/}
-
-        bool intersect(const Ray &ray, float &t) const;
+        bool intersect(const Ray &ray, intersectionList &list) const;
     private:
         float radius;
     };
@@ -53,8 +65,7 @@ namespace raytracer
     {
     public:
         Plane(const Vector3f &pos, const Vector3f &n, const Material &mat) : SolidObject(pos, mat), normal(n) {/*empty*/}
-        bool intersect(const Ray &ray, float &t) const;
-
+        bool intersect(const Ray &ray, intersectionList &list) const;
     private:
         Vector3f normal;
     };

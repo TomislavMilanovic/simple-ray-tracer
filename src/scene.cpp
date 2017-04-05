@@ -1,4 +1,5 @@
 #include <fstream>
+#include <iostream>
 #include "scene.h"
 
 //promijeniti pristup
@@ -49,47 +50,48 @@ namespace raytracer
     Color Scene::trace(Ray &r, const glm::uint16 &lvl)
     {
         Color result;
+        intersectionList list;
 
         float coef = 1.0f;
         glm::uint16 level = lvl;
 
         do
         {
-            float t = std::numeric_limits<float>::infinity();
-            glm::int16 currentObject = -1;
+            Intersection *closestIntersection = NULL;
+            list.clear();
 
             for(glm::uint16 i = 0; i < objects.size(); ++i)
-                if(objects[i]->intersect(r, t)) currentObject = i;
-            if(currentObject == -1) break;
+                objects[i]->intersect(r, list);
 
-            Vector3f newDir = t * r.dir; // p = t*d + p0
-            Vector3f newStart = r.start + newDir; //tocka na objektu
+            if(list.size() == 0)
+                break;
 
-            Vector3f n = newStart - objects[currentObject]->position;
-            n = glm::normalize(n);
+            closestIntersection = &list[0];
 
-            /*if(typeid(*scene.objects[currentObject]).name() == typeid(*scene.objects[2]).name())
-                n = -glm::normalize(Vector3f(0.0f, 1.0f, 1.0f));*/
+            for(glm::uint16 i = 0; i < list.size(); ++i)
+            {
+                if(list[i].distance < closestIntersection->distance)
+                {
+                    closestIntersection = &list[i];
+                }
+            }
 
-            //cout << n.x << " " << n.y << " " << n.z << " "<< endl;
-
-            Material currentMat = objects[currentObject]->material;
+            Material currentMat = closestIntersection->solid->material;
 
             for(glm::uint16 i = 0; i < lights.size(); ++i)
             {
                 Light currentLight = lights[i];
 
-                Vector3f dist = currentLight.pos - newStart;
-                if(glm::dot(n, dist) <= 0.0f) continue; //ako nikako nema svjetla
+                Vector3f dist = currentLight.pos - closestIntersection->point;
+                if(glm::dot(closestIntersection->normal, dist) <= 0.0f) continue; //ako nikako nema svjetla
 
-                Ray lightRay(newStart, glm::normalize(dist));
+                Ray lightRay(closestIntersection->point, glm::normalize(dist));
 
                 bool inShadow = false;
-                t = std::numeric_limits<float>::infinity(); //zamijeni infinity sa nekim def
 
                 for(glm::uint16 j = 0; j < objects.size(); ++j)
                 {
-                    if(objects[j]->intersect(lightRay, t))
+                    if(objects[j]->intersect(lightRay, list))
                     {
                         inShadow = true;
                         break;
@@ -97,7 +99,7 @@ namespace raytracer
                 }
                 if(!inShadow)
                 {
-                    float lambert = glm::dot(lightRay.dir, n) * coef;
+                    float lambert = glm::dot(lightRay.dir, closestIntersection->normal) * coef;
                     result.r += lambert * currentLight.intensity.r * currentMat.diffuse.r;
                     result.g += lambert * currentLight.intensity.g * currentMat.diffuse.g;
                     result.b += lambert * currentLight.intensity.b * currentMat.diffuse.b;
@@ -107,8 +109,8 @@ namespace raytracer
             coef *= currentMat.reflection;
 
             //odbijena zraka
-            r.dir = glm::reflect(r.dir, n);
-            r.start = newStart;
+            r.dir = glm::reflect(r.dir, closestIntersection->normal);
+            r.start = closestIntersection->point;
             level--;
 
         }while((coef > 0.0f) && (level > 0));

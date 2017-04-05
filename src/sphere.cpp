@@ -1,8 +1,9 @@
 #include "raytracer.h"
+#include <iostream>
 
 namespace raytracer
 {
-    bool Sphere::intersect(const Ray &ray, float &t) const
+    bool Sphere::intersect(const Ray &ray, intersectionList &list) const
     {
         bool return_value = false;
 
@@ -22,9 +23,17 @@ namespace raytracer
 
             t0 = glm::min(t0, t1);
 
-            if((t0 > 0.0f) && (t0 < t))
+            if((t0 > 0.0f))
             {
-                t = t0;
+                Intersection intersection;
+
+                intersection.distance = t0;
+                intersection.point = ray.start + t0 * ray.dir;
+                intersection.normal = glm::normalize(intersection.point - position);
+                intersection.solid = this;
+
+                list.push_back(intersection);
+
                 return_value = true;
             }
             else return_value = false;
