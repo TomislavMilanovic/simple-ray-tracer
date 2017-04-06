@@ -5,6 +5,7 @@
 
 //promijeniti pristup
 #include "../lib/glm/glm.hpp"
+#include "../lib/glm/gtc/constants.hpp"
 
 namespace raytracer
 {
@@ -26,6 +27,7 @@ namespace raytracer
     public:
         Color diffuse;
         float reflection;
+        std::vector<Color> *image;
 
         Material(const Color &d, const float &refl) : diffuse(d), reflection(refl) {}
     };

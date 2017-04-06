@@ -2,6 +2,9 @@
 #include <iostream>
 #include "scene.h"
 
+#include <typeinfo>
+#include <vector>
+
 //promijeniti pristup
 #include "../lib/lodepng/lodepng.h"
 
@@ -98,11 +101,44 @@ namespace raytracer
                     }
                 }
                 if(!inShadow)
-                {
-                    float lambert = glm::dot(lightRay.dir, closestIntersection->normal) * coef;
-                    result.r += lambert * currentLight.intensity.r * currentMat.diffuse.r;
-                    result.g += lambert * currentLight.intensity.g * currentMat.diffuse.g;
-                    result.b += lambert * currentLight.intensity.b * currentMat.diffuse.b;
+                {              
+                    //Ako je sfera
+                    if(typeid(*closestIntersection->solid).name() == typeid(*(objects[0])).name() &&
+                            closestIntersection->solid->material.reflection == materials[2].reflection)
+                    {
+                        float lambert = glm::dot(lightRay.dir, closestIntersection->normal) * coef;
+
+                        float u = 0.0f;
+                        float v = 0.0f;
+
+                        int x_texture = 0;
+                        int y_texture = 0;
+
+                        Vector3f d = -closestIntersection->normal;
+
+                        u = 0.5f + (glm::atan(d.z, d.x)) / (2.0f*glm::pi<float>());
+                        v = 0.5f - (glm::asin(d.y)) / (glm::pi<float>());
+
+                        x_texture = (int)glm::floor(u * 512.0f);
+                        y_texture = (int)glm::floor(v * 256.0f);
+
+                        std::vector<Color> *cc = closestIntersection->solid->material.image;
+
+                        result.r += lambert * currentLight.intensity.r * ((*cc)[y_texture * 512 + x_texture].r);
+                        result.g += lambert * currentLight.intensity.g * ((*cc)[y_texture * 512 + x_texture].g);
+                        result.b += lambert * currentLight.intensity.b * ((*cc)[y_texture * 512 + x_texture].b);
+
+                        /*result.r += lambert * currentLight.intensity.r * currentMat.diffuse.r;
+                        result.g += lambert * currentLight.intensity.g * currentMat.diffuse.g;
+                        result.b += lambert * currentLight.intensity.b * currentMat.diffuse.b;*/
+                    }
+                    else //ako je plane ili sve ostalo
+                    {
+                        float lambert = glm::dot(lightRay.dir, closestIntersection->normal) * coef;
+                        result.r += lambert * currentLight.intensity.r * currentMat.diffuse.r;
+                        result.g += lambert * currentLight.intensity.g * currentMat.diffuse.g;
+                        result.b += lambert * currentLight.intensity.b * currentMat.diffuse.b;
+                    }
                 }
             }
 
