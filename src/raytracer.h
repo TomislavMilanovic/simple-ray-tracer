@@ -60,7 +60,7 @@ namespace raytracer
     public:
         Sphere(const Vector3f &pos, const float &rad, const Material &mat) : SolidObject(pos, mat), radius(rad) {/*empty*/}
         bool intersect(const Ray &ray, intersectionList &list) const;
-    private:
+        bool intersect(const Ray &ray, Intersection &intsc) const;
         float radius;
     };
     class Plane : public SolidObject

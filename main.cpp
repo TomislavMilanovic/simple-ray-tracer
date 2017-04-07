@@ -15,7 +15,7 @@ int main()
     //LOAD PNG EARTH TEXTURE, FOR TEST
 
     std::vector<unsigned char> buffer, image;
-    lodepng::load_file(buffer, "earth_texture_small.png");
+    lodepng::load_file(buffer, "Heightmap.png");
 
     unsigned w, h, jump = 1;
 
