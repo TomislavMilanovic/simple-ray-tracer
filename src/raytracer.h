@@ -59,8 +59,12 @@ namespace raytracer
     {
     public:
         Sphere(const Vector3f &pos, const float &rad, const Material &mat) : SolidObject(pos, mat), radius(rad) {/*empty*/}
+
         bool intersect(const Ray &ray, intersectionList &list) const;
-        bool intersect(const Ray &ray, Intersection &intsc) const;
+        bool intersect1(const Ray &ray, intersectionList &list,const glm::float32 start_t) const;
+        bool intersect2(const Ray &ray, intersectionList &list) const;
+
+        bool intersect(const Ray &ray, Intersection &intsc, const glm::float32 &radius) const;
         float radius;
     };
     class Plane : public SolidObject

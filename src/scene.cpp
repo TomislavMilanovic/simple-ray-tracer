@@ -102,6 +102,7 @@ namespace raytracer
                         break;
                     }
                 }
+                //inShadow = false;
                 if(!inShadow)
                 {              
                     //Ako je sfera
@@ -110,7 +111,10 @@ namespace raytracer
                     {
                         float lambert = glm::dot(lightRay.dir, closestIntersection->normal) * coef;
 
-                        /*float u = 0.0f;
+                        /*const float w = 257.0f;
+                        const float h = 257.0f;
+
+                        float u = 0.0f;
                         float v = 0.0f;
 
                         int x_texture = 0;
@@ -121,14 +125,14 @@ namespace raytracer
                         u = 0.5f + (glm::atan(d.z, d.x)) / (2.0f*glm::pi<float>());
                         v = 0.5f - (glm::asin(d.y)) / (glm::pi<float>());
 
-                        x_texture = (int)glm::floor(u * 2048.0f);
-                        y_texture = (int)glm::floor(v * 1024.0f);
+                        x_texture = (int)glm::floor(u * w);
+                        y_texture = (int)glm::floor(v * h);
 
                         std::vector<Color> *cc = closestIntersection->solid->material.image;
 
-                        result.r += lambert * currentLight.intensity.r * ((*cc)[y_texture * 2048 + x_texture].r);
-                        result.g += lambert * currentLight.intensity.g * ((*cc)[y_texture * 2048 + x_texture].g);
-                        result.b += lambert * currentLight.intensity.b * ((*cc)[y_texture * 2048 + x_texture].b);*/
+                        result.r += lambert * currentLight.intensity.r * ((*cc)[y_texture * (int)w + x_texture].r);
+                        result.g += lambert * currentLight.intensity.g * ((*cc)[y_texture * (int)w + x_texture].g);
+                        result.b += lambert * currentLight.intensity.b * ((*cc)[y_texture * (int)w + x_texture].b);*/
 
                         result.r += lambert * currentLight.intensity.r * currentMat.diffuse.r;
                         result.g += lambert * currentLight.intensity.g * currentMat.diffuse.g;
@@ -201,7 +205,7 @@ namespace raytracer
         {
             for(glm::uint16 x = 0; x < width; ++x)
             {
-                img[y*width + x] = supersampling_grid(3, y, x, level);
+                img[y*width + x] = supersampling_grid(1, y, x, level);
                 //printf("height: %d width: %d\n", y, x);
             }
         }
