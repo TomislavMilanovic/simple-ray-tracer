@@ -32,24 +32,23 @@ namespace raytracer
             {
                 //printf("dist: %f\n", testIntersection.distance);
 
-                d = -testIntersection.normal;
+                const float H = 257.0f;
+                const float W = 257.0f;
 
-                u = 0.5f + (glm::atan(d.z, d.x)) / (2.0f*glm::pi<float>());
-                v = 0.5f - (glm::asin(d.y)) / (glm::pi<float>());
+                Vector2f UV = UV_mapping(-testIntersection.normal, H, W);
 
-                const float H = 256.0f;
-                const float W = 256.0f;
-
-                x_texture = (int)glm::floor(u * H) % (int)H/*+ 200*/;
-                y_texture = (int)glm::floor(v * W);
+                x_texture = UV.x;
+                y_texture = UV.y;
 
                 //printf("x_text: %d y_text: %d\n", x_texture, y_texture);
 
-                float df = 0.3f * ((*material.image)[y_texture * (int)H + x_texture].r) +
+                /*float df = 0.3f * ((*material.image)[y_texture * (int)H + x_texture].r) +
                            0.59f * ((*material.image)[y_texture * (int)H + x_texture].g) +
-                           0.11f * ((*material.image)[y_texture * (int)H + x_texture].b);
+                           0.11f * ((*material.image)[y_texture * (int)H + x_texture].b);*/
 
-                float du = 40.0f;
+                float df = 1.0f;
+
+                float du = 20.0f;
 
                 float d_ = df*du;
 
@@ -69,7 +68,7 @@ namespace raytracer
                 if(/*glm::length(pointBefore - testPoint) <= 1.0f ||*/
                         //glm::dot((testPoint - displacedPoint), (testIntersection.point - testPoint)) >= 0.0f)
 
-                 glm::length(testPoint - displacedPoint) <= 1.0f)
+                 glm::length(testPoint - displacedPoint) <= 5.0f)
                 {
                     //printf("\r t: %f\n", t);
                     //printf("\rray.start.x: %f ray.start.y: %f\n", ray.start.x, ray.start.y);
@@ -120,7 +119,7 @@ namespace raytracer
         //printf("max: %.15f\n", max_displacement);
 
         float df = 0.996078372001648f;
-        float du = 40.0f;
+        float du = 20.0f;
 
         float d_ = df*du;
 

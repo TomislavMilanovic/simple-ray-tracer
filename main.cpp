@@ -15,7 +15,7 @@ int main()
     //LOAD PNG EARTH TEXTURE, FOR TEST
 
     std::vector<unsigned char> buffer, image;
-    lodepng::load_file(buffer, "Heightmap.png");
+    lodepng::load_file(buffer, "earth_texture_big.png");
 
     unsigned w, h, jump = 1;
 
@@ -50,15 +50,22 @@ int main()
 
     Scene scene;
 
+    Texture earth_texture(better, w, h);
+    SphereTextureMap sphere_earth(earth_texture);
+
+
+    /*
     scene.materials.push_back(Material(Color(1.0f, 0.0f, 0.0f), 1.0f));
     scene.materials.push_back(Material(Color(0.0f, 1.0f, 0.0f), 1.0f)); 
     scene.materials.push_back(Material(Color(0.0f, 1.0f, 1.0f), 0.0f)); 
+    */
 
-    *scene.materials[2].image = better;
+    //*scene.materials[2].image = better;
 
-    scene.objects.push_back(new Sphere(Vector3f(200.0f, 300.0f, 0.0f), 75.0f, scene.materials[0]));
-    scene.objects.push_back(new Sphere(Vector3f(500.0f, 300.0f, 0.0f), 75.0f, scene.materials[2]));
-    scene.objects.push_back(new Plane(Vector3f(350.0f, -450.0f, 975.0f), glm::normalize(Vector3f(0.0f, 1.0f, 1.0f)), scene.materials[2]));
+    scene.objects.push_back(new Sphere(Vector3f(200.0f, 300.0f, 0.0f), 75.0f, Material(Color(1.0f, 0.0f, 0.0f), 1.0f)));
+    //scene.objects.push_back(new Sphere(Vector3f(500.0f, 300.0f, 0.0f), 75.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
+    scene.objects.push_back(new Sphere(Vector3f(500.0f, 300.0f, 0.0f), 75.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f), sphere_earth));
+    scene.objects.push_back(new Plane(Vector3f(350.0f, -450.0f, 975.0f), glm::normalize(Vector3f(0.0f, 1.0f, 1.0f)), Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
 
     //scene.objects.push_back(new Plane(Vector3f(2000.0f, 375.0f, 50.0f), glm::normalize(Vector3f(0.0f, 1.0f, 1.0f)), scene.materials[2]));
     /*Vector3f n = glm::normalize(Vector3f(0.0f, 1.0f, 1.0f));

@@ -12,7 +12,7 @@ namespace raytracer
     public:
         std::vector<SolidObject*> objects;
         std::vector<Light> lights;
-        std::vector<Material> materials;
+        //std::vector<Material> materials;
 
         void render(const glm::uint16 &width, const glm::uint16 &height, const glm::uint16 &level);
     private:
