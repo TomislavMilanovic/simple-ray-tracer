@@ -9,11 +9,11 @@ namespace raytracer
         Vector3f testPoint = ray.start + t*ray.dir;
         //Vector3f pointBefore(-200.0f, -200.0f, -200.0f);
 
-        float u = 0.0f;
+        /*float u = 0.0f;
         float v = 0.0f;
 
         int x_texture = 0;
-        int y_texture = 0;
+        int y_texture = 0;*/
 
         Vector3f d;
 
@@ -32,13 +32,13 @@ namespace raytracer
             {
                 //printf("dist: %f\n", testIntersection.distance);
 
-                const float H = 257.0f;
+                /*const float H = 257.0f;
                 const float W = 257.0f;
 
                 Vector2f UV = UV_mapping(-testIntersection.normal, H, W);
 
                 x_texture = UV.x;
-                y_texture = UV.y;
+                y_texture = UV.y;*/
 
                 //printf("x_text: %d y_text: %d\n", x_texture, y_texture);
 
@@ -46,11 +46,19 @@ namespace raytracer
                            0.59f * ((*material.image)[y_texture * (int)H + x_texture].g) +
                            0.11f * ((*material.image)[y_texture * (int)H + x_texture].b);*/
 
-                float df = 1.0f;
+                float d_ = 20.0f;
 
-                float du = 20.0f;
+                if(displacement_map != NULL)
+                {
+                    const SphereDisplacementMap &disp_map = *displacement_map;
+                    d_ = disp_map.getDispMapping(testIntersection.normal);
+                }
 
-                float d_ = df*du;
+                //float df = 1.0f;
+
+                //float du = 20.0f;
+
+                //float d_ = df*du;
 
                 /*if(d_ < 1.0f)
                     d_ = 0.0f;*/
@@ -98,10 +106,10 @@ namespace raytracer
     }
     bool Sphere::intersect2(const Ray &ray, intersectionList &list) const
     {
-        const float h = 257.0f;
+        /*const float h = 257.0f;
         const float w = 257.0f;
 
-        float max_displacement = 0.0f;
+        float max_displacement = 0.0f;*/
 
         /*for(int y = 0; y < h; ++y)
         {
@@ -117,9 +125,19 @@ namespace raytracer
 
         //0.996078372001648
         //printf("max: %.15f\n", max_displacement);
+        const SphereDisplacementMap &disp_map = *displacement_map;
+
+        /*std::cout << disp_map.get_du() << std::endl;
+        std::cout << disp_map.get_max_displacement() << std::endl;*/
 
         float df = 0.996078372001648f;
-        float du = 20.0f;
+        float du = 30.0f;
+
+        if(displacement_map != NULL)
+        {
+            df = disp_map.get_max_displacement();
+            du = disp_map.get_du();
+        }
 
         float d_ = df*du;
 

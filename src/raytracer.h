@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <stdio.h>
+#include <iostream>
 
 //promijeniti pristup
 #include "../lib/glm/glm.hpp"
@@ -71,12 +72,34 @@ namespace raytracer
     public:
         virtual float getDispMapping(Vector3f& point) const = 0;
 
-        DisplacementMap(const Texture& d_map, const float& du_) : displacement_map(d_map), du(du_) {}
+        const float& get_max_displacement() const {return max_displacement;}
+        const float& get_du() const {return du;}
+
+        DisplacementMap(const Texture& d_map, const float& du_) : displacement_map(d_map), du(du_), max_displacement(calculate_max_displacement()) {}
     protected:
         Texture displacement_map;
-        float du;
-    };
+        const float du;
+        const float max_displacement;
 
+    private:
+        float calculate_max_displacement() const
+        {
+            float max_disp = 0.0f;
+
+            for(unsigned y = 0; y < displacement_map.height(); ++y)
+            {
+                for(unsigned x = 0; x < displacement_map.width(); ++x)
+                {
+                    const Color& map = displacement_map.texture(x, y);
+                    float df = 0.3f * map.r + 0.59f * map.g + 0.11f * map.b;
+
+                    if(df > max_disp) max_disp = df;
+                 }
+            }
+
+            return max_disp;
+        }
+    };
 
     class SphereTextureMap : public TextureMap
     {
@@ -100,6 +123,8 @@ namespace raytracer
             const float df = 0.3f * (color.r) + 0.59f * (color.g) + 0.11f * (color.b);
             return df * du;
         }
+
+        SphereDisplacementMap(const Texture& d_map, const float& du_) : DisplacementMap(d_map, du_) {}
     };
 
 
@@ -133,6 +158,7 @@ namespace raytracer
     public:
         Sphere(const Vector3f &pos, const float &rad, const Material &mat) : SolidObject(pos, mat), radius(rad) {/*empty*/}
         Sphere(const Vector3f &pos, const float &rad, const Material &mat, const SphereTextureMap &txt) : SolidObject(pos, mat), radius(rad), texture_map(&txt) {/*empty*/}
+        Sphere(const Vector3f &pos, const float &rad, const Material &mat, const SphereDisplacementMap &disp) : SolidObject(pos, mat), radius(rad), displacement_map(&disp) {/*empty*/}
 
         bool intersect(const Ray &ray, intersectionList &list) const;
         bool intersect1(const Ray &ray, intersectionList &list,const glm::float32 start_t) const;
@@ -155,6 +181,7 @@ namespace raytracer
                 Color pointColor = text_map.getTextureMapping(normal);
 
                 currentMaterial.setDiffuse(pointColor);
+
                 return currentMaterial;
             }
         }
@@ -162,7 +189,7 @@ namespace raytracer
         float radius;
     private:
         const SphereTextureMap *texture_map = NULL;
-        const SphereDisplacementMap *disp_map;
+        const SphereDisplacementMap *displacement_map = NULL;
     };
 
     class Plane : public SolidObject
