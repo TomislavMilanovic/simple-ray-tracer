@@ -94,6 +94,8 @@ namespace raytracer
 
                 bool inShadow = false;
 
+                //Staviti da ako je sjena da završava algoritam općenito
+
                 for(glm::uint16 j = 0; j < objects.size(); ++j)
                 {
                     if(objects[j]->intersect(lightRay, list))

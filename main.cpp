@@ -51,8 +51,8 @@ int main()
     Texture earth_texture = generate_texture("earth_texture_big.png");
     SphereTextureMap sphere_earth(earth_texture);
 
-    Texture height_map = generate_texture("Heightmap2.png");
-    SphereDisplacementMap sphere_heightmap(height_map, 30.0f);
+    Texture height_map = generate_texture("Heightmap.png");
+    SphereDisplacementMap sphere_heightmap(height_map, 55.0f);
 
 
     /*
@@ -63,9 +63,9 @@ int main()
 
     //*scene.materials[2].image = better;
 
-    scene.objects.push_back(new Sphere(Vector3f(200.0f, 300.0f, 0.0f), 75.0f, Material(Color(1.0f, 0.0f, 0.0f), 1.0f), sphere_heightmap));
+    scene.objects.push_back(new Sphere(Vector3f(200.0f, 300.0f, 0.0f), 75.0f, Material(Color(1.0f, 0.0f, 0.0f), 0.0f), sphere_heightmap));
     //scene.objects.push_back(new Sphere(Vector3f(500.0f, 300.0f, 0.0f), 75.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
-    scene.objects.push_back(new Sphere(Vector3f(500.0f, 300.0f, 0.0f), 75.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f), sphere_earth));
+    scene.objects.push_back(new Sphere(Vector3f(500.0f, 300.0f, 0.0f), 75.0f, Material(Color(0.0f, 1.0f, 1.0f), 1.0f), sphere_earth));
     scene.objects.push_back(new Plane(Vector3f(350.0f, -450.0f, 975.0f), glm::normalize(Vector3f(0.0f, 1.0f, 1.0f)), Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
 
     //scene.objects.push_back(new Plane(Vector3f(2000.0f, 375.0f, 50.0f), glm::normalize(Vector3f(0.0f, 1.0f, 1.0f)), scene.materials[2]));

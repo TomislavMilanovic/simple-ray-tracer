@@ -3,173 +3,14 @@
 
 namespace raytracer
 {
-    bool Sphere::intersect1(const Ray &ray, intersectionList &list, const glm::float32 start_t) const
-    {
-        glm::float32 t = start_t;
-        Vector3f testPoint = ray.start + t*ray.dir;
-        //Vector3f pointBefore(-200.0f, -200.0f, -200.0f);
-
-        /*float u = 0.0f;
-        float v = 0.0f;
-
-        int x_texture = 0;
-        int y_texture = 0;*/
-
-        Vector3f d;
-
-        if(glm::length(position - ray.start) <= radius)
-            return false;
-
-        //printf("\rray.start.x: %f ray.start.y: %f\n", ray.start.x, ray.start.y);
-
-        while(1)
-        {
-            Ray testRay(testPoint, glm::normalize(position - testPoint));
-
-            Intersection testIntersection;
-
-            if(intersect(testRay, testIntersection, radius))
-            {
-                //printf("dist: %f\n", testIntersection.distance);
-
-                /*const float H = 257.0f;
-                const float W = 257.0f;
-
-                Vector2f UV = UV_mapping(-testIntersection.normal, H, W);
-
-                x_texture = UV.x;
-                y_texture = UV.y;*/
-
-                //printf("x_text: %d y_text: %d\n", x_texture, y_texture);
-
-                /*float df = 0.3f * ((*material.image)[y_texture * (int)H + x_texture].r) +
-                           0.59f * ((*material.image)[y_texture * (int)H + x_texture].g) +
-                           0.11f * ((*material.image)[y_texture * (int)H + x_texture].b);*/
-
-                float d_ = 20.0f;
-
-                if(displacement_map != NULL)
-                {
-                    const SphereDisplacementMap &disp_map = *displacement_map;
-                    d_ = disp_map.getDispMapping(testIntersection.normal);
-                }
-
-                //float df = 1.0f;
-
-                //float du = 20.0f;
-
-                //float d_ = df*du;
-
-                /*if(d_ < 1.0f)
-                    d_ = 0.0f;*/
-
-                //printf("d_: %f\n", d_);
-
-                Vector3f displacedPoint = testIntersection.point + (testIntersection.normal * d_);
-                if(t == start_t && glm::length(ray.start - displacedPoint) <= 20.0f) return false;
-
-                //t += glm::length(testPoint - displacedPoint);
-                t += 0.5f;
-
-                //printf("\rray.start.x: %f ray.start.y: %f\n", ray.start.x, ray.start.y);
-                //if(glm::dot((testPoint - displacedPoint), (testIntersection.point - testPoint)) >= 0.0f)
-                if(/*glm::length(pointBefore - testPoint) <= 1.0f ||*/
-                        //glm::dot((testPoint - displacedPoint), (testIntersection.point - testPoint)) >= 0.0f)
-
-                 glm::length(testPoint - displacedPoint) <= 5.0f)
-                {
-                    //printf("\r t: %f\n", t);
-                    //printf("\rray.start.x: %f ray.start.y: %f\n", ray.start.x, ray.start.y);
-
-                    Intersection intersection;
-
-                    intersection.distance = t;
-                    intersection.point = testPoint;
-                    //intersection.point = displacedPoint;
-                    intersection.normal = glm::normalize(intersection.point - position);
-                    intersection.solid = this;
-
-                    list.push_back(intersection);
-
-                    return true;
-                }
-            }
-            else
-                return false;
-
-            //pointBefore = testPoint;
-            testPoint = ray.start + t*ray.dir;
-
-            if(t > 2000.0f)
-                return false;
-        }
-    }
-    bool Sphere::intersect2(const Ray &ray, intersectionList &list) const
-    {
-        /*const float h = 257.0f;
-        const float w = 257.0f;
-
-        float max_displacement = 0.0f;*/
-
-        /*for(int y = 0; y < h; ++y)
-        {
-            for(int x = 0; x < w; ++x)
-            {
-                float df = 0.3f * ((*material.image)[y * (int)h + x].r) +
-                           0.59f * ((*material.image)[y * (int)h + x].g) +
-                           0.11f * ((*material.image)[y * (int)h + x].b);
-
-                if(df > max_displacement) max_displacement = df;
-            }
-        }*/
-
-        //0.996078372001648
-        //printf("max: %.15f\n", max_displacement);
-        const SphereDisplacementMap &disp_map = *displacement_map;
-
-        /*std::cout << disp_map.get_du() << std::endl;
-        std::cout << disp_map.get_max_displacement() << std::endl;*/
-
-        float df = 0.996078372001648f;
-        float du = 30.0f;
-
-        if(displacement_map != NULL)
-        {
-            df = disp_map.get_max_displacement();
-            du = disp_map.get_du();
-        }
-
-        float d_ = df*du;
-
-        float t = 0.0f;
-
-        Intersection testIntersection;
-
-        if(intersect(ray, testIntersection, radius + d_))
-        {
-            t = testIntersection.distance;
-            return intersect1(ray, list, t);
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    bool Sphere::intersect(const Ray &ray, intersectionList &list) const
-    {
-        return intersect2(ray, list);
-    }
-
-
-    bool Sphere::intersect(const Ray &ray, Intersection &intsc, const glm::float32 &radius) const
+    bool Sphere::normal_intersect(const Ray &ray, Intersection &intsc, const glm::float32 &custom_radius) const
     {
         bool return_value = false;
 
         float A = glm::dot(ray.dir, ray.dir);
         Vector3f dist = ray.start - position;
         float B = 2.0f * glm::dot(ray.dir, dist);
-        float C = glm::dot(dist, dist) - (radius * radius);
+        float C = glm::dot(dist, dist) - (custom_radius * custom_radius);
         float discr = B * B - 4.0f * A * C;
 
         if(discr < 0.0f)
@@ -199,5 +40,102 @@ namespace raytracer
         }
 
         return return_value;
+    }
+    bool Sphere::normal_intersect_wrapper(const Ray &ray, intersectionList &list) const
+    {
+        Intersection testIntersection;
+        const bool isIntersect = normal_intersect(ray, testIntersection, radius);
+
+        //std::cout << testIntersection.point.x << std::endl;
+
+        if(isIntersect) list.push_back(testIntersection);
+
+        return isIntersect;
+    }
+
+    bool Sphere::disp_mapping_intersect(const Ray &ray, intersectionList &list, const glm::float32 start_t) const
+    {
+        glm::float32 t = start_t;
+        Vector3f testPoint = ray.start + t*ray.dir;
+
+        const SphereDisplacementMap &disp_map = *displacement_map;
+
+        const float max_disp_df = disp_map.get_max_displacement();
+        const float max_disp_du = disp_map.get_du();
+
+        if(glm::length(position - ray.start) <= radius)
+            return false;
+
+        while(1)
+        {
+            Ray testRay(testPoint, glm::normalize(position - testPoint));
+
+            Intersection testIntersection;
+
+            if(normal_intersect(testRay, testIntersection, radius))
+            {
+                const SphereDisplacementMap &disp_map = *displacement_map;
+                float d_ = disp_map.getDispMapping(testIntersection.normal);
+
+                Vector3f displacedPoint = testIntersection.point + (testIntersection.normal * d_);
+                if(t == start_t && glm::length(ray.start - displacedPoint) <= 20.0f) return false;
+
+                t += 0.5f;
+
+                if(//glm::dot((testPoint - displacedPoint), (testIntersection.point - testPoint)) >= 0.0f &&
+                   glm::length(testPoint - displacedPoint) <= 5.0f)
+                {
+                    Intersection intersection;
+
+                    intersection.distance = t;
+                    //intersection.point = testPoint;
+                    intersection.point = displacedPoint;
+                    intersection.normal = glm::normalize(intersection.point - position);
+                    intersection.solid = this;
+
+                    list.push_back(intersection);
+
+                    return true;
+                }
+            }
+            else
+                return false;
+
+            testPoint = ray.start + t*ray.dir;
+
+            //testirati da li je trenutna točka unutar "proširene" sfere
+
+            if(!isPointInSphere(testPoint, position, radius + max_disp_df * max_disp_du))
+                return false;
+
+            /*if(t > 2000.0f)
+                return false;*/
+        }
+    }
+    bool Sphere::disp_mapping_intersect_wrapper(const Ray &ray, intersectionList &list) const
+    {
+        const SphereDisplacementMap &disp_map = *displacement_map;
+
+        const float df = disp_map.get_max_displacement();
+        const float du = disp_map.get_du();
+
+        const float d_ = df*du;
+
+        float t = 0.0f;
+
+        Intersection testIntersection;
+
+        if(normal_intersect(ray, testIntersection, radius + d_))
+        {
+            t = testIntersection.distance;
+            return disp_mapping_intersect(ray, list, t);
+        }
+
+        return false;
+    }
+
+    bool Sphere::intersect(const Ray &ray, intersectionList &list) const
+    {
+        return (this->*intersect_func)(ray, list);
     }
 }

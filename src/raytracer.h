@@ -25,6 +25,18 @@ namespace raytracer
 
         return Vector2f((int)glm::floor(u * width), (int)glm::floor(v * height));
     }
+    inline bool isPointInSphere(const Vector3f &point, const Vector3f &position, const float &custom_radius)
+    {
+        if(glm::pow(point.x - position.x, 2.0f) +
+           glm::pow(point.y - position.y, 2.0f) +
+           glm::pow(point.z - position.z, 2.0f) <= custom_radius * custom_radius)
+        {
+           return true;
+        }
+
+        return false;
+    }
+
 
     class Ray
     {
@@ -80,7 +92,6 @@ namespace raytracer
         Texture displacement_map;
         const float du;
         const float max_displacement;
-
     private:
         float calculate_max_displacement() const
         {
@@ -156,15 +167,21 @@ namespace raytracer
     class Sphere : public SolidObject
     {
     public:
-        Sphere(const Vector3f &pos, const float &rad, const Material &mat) : SolidObject(pos, mat), radius(rad) {/*empty*/}
-        Sphere(const Vector3f &pos, const float &rad, const Material &mat, const SphereTextureMap &txt) : SolidObject(pos, mat), radius(rad), texture_map(&txt) {/*empty*/}
-        Sphere(const Vector3f &pos, const float &rad, const Material &mat, const SphereDisplacementMap &disp) : SolidObject(pos, mat), radius(rad), displacement_map(&disp) {/*empty*/}
+
+        Sphere(const Vector3f &pos, const float &rad, const Material &mat) : SolidObject(pos, mat), radius(rad)
+        {
+            intersect_func = &raytracer::Sphere::normal_intersect_wrapper;
+        }
+        Sphere(const Vector3f &pos, const float &rad, const Material &mat, const SphereTextureMap &txt) : SolidObject(pos, mat), radius(rad), texture_map(&txt)
+        {
+            intersect_func = &raytracer::Sphere::normal_intersect_wrapper;
+        }
+        Sphere(const Vector3f &pos, const float &rad, const Material &mat, const SphereDisplacementMap &disp) : SolidObject(pos, mat), radius(rad), displacement_map(&disp)
+        {
+            intersect_func = &raytracer::Sphere::disp_mapping_intersect_wrapper;
+        }
 
         bool intersect(const Ray &ray, intersectionList &list) const;
-        bool intersect1(const Ray &ray, intersectionList &list,const glm::float32 start_t) const;
-        bool intersect2(const Ray &ray, intersectionList &list) const;
-
-        bool intersect(const Ray &ray, Intersection &intsc, const glm::float32 &radius) const;
 
         Material surfaceMaterial(const Vector3f &surfacePoint) const
         {
@@ -187,7 +204,16 @@ namespace raytracer
         }
 
         float radius;
-    private:
+    private:     
+        bool normal_intersect(const Ray &ray, Intersection &intsc, const glm::float32 &custom_radius) const;
+        bool disp_mapping_intersect(const Ray &ray, intersectionList &list,const glm::float32 start_t) const;
+
+        bool normal_intersect_wrapper(const Ray &ray, intersectionList &list) const;
+        bool disp_mapping_intersect_wrapper(const Ray &ray, intersectionList &list) const;
+
+        typedef bool (raytracer::Sphere::*IntersectFunc) (const Ray&, intersectionList&) const;
+        IntersectFunc intersect_func;
+
         const SphereTextureMap *texture_map = NULL;
         const SphereDisplacementMap *displacement_map = NULL;
     };
