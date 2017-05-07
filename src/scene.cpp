@@ -53,12 +53,12 @@ namespace raytracer
     Color Scene::trace(Ray &r, const glm::uint16 &lvl)
     {
         Color result;
-        intersectionList list;
+        intersectionList list, testList;
 
         float coef = 1.0f;
         glm::uint16 level = lvl;
 
-        //printf("\r ray.start.x: %f ray.start.y: %f", r.start.x, r.start.y);
+        bool inShadow = false;
 
         do
         {
@@ -92,14 +92,15 @@ namespace raytracer
 
                 Ray lightRay(closestIntersection->point, glm::normalize(dist));
 
-                bool inShadow = false;
-
                 //Staviti da ako je sjena da završava algoritam općenito
 
                 for(glm::uint16 j = 0; j < objects.size(); ++j)
                 {
-                    if(objects[j]->intersect(lightRay, list))
+                    testList.clear();
+                    if(objects[j]->intersect(lightRay, testList))
                     {
+                        if(testList.back().solid == closestIntersection->solid)
+                            break;
                         inShadow = true;
                         break;
                     }
@@ -108,10 +109,11 @@ namespace raytracer
                 if(!inShadow)
                 {
                     const Color diffuse = currentMat.diffuse();
-                        float lambert = glm::dot(lightRay.dir, closestIntersection->normal) * coef;
-                        result.r += lambert * currentLight.intensity.r * diffuse.r;
-                        result.g += lambert * currentLight.intensity.g * diffuse.g;
-                        result.b += lambert * currentLight.intensity.b * diffuse.b;
+                    float lambert = glm::dot(lightRay.dir, closestIntersection->normal) * coef;
+
+                    result.r += lambert * currentLight.intensity.r * diffuse.r;
+                    result.g += lambert * currentLight.intensity.g * diffuse.g;
+                    result.b += lambert * currentLight.intensity.b * diffuse.b;
                 }
             }
 
@@ -177,7 +179,7 @@ namespace raytracer
             }
         }
 
-        savepng("scene3.png", width, height);
+        savepng("scene_distanceSquared.png", width, height);
 
         img.clear();
     }

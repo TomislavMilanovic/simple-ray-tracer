@@ -7,28 +7,28 @@ namespace raytracer
     {
         bool return_value = false;
 
-        float A = glm::dot(ray.dir, ray.dir);
-        Vector3f dist = ray.start - position;
-        float B = 2.0f * glm::dot(ray.dir, dist);
-        float C = glm::dot(dist, dist) - (custom_radius * custom_radius);
-        float discr = B * B - 4.0f * A * C;
+        const float A = glm::dot(ray.dir, ray.dir);
+        const Vector3f dist = ray.start - position;
+        const float B = 2.0f * glm::dot(ray.dir, dist);
+        const float C = glm::dot(dist, dist) - (custom_radius * custom_radius);
+        const float discr = B * B - 4.0f * A * C;
 
         if(discr < 0.0f)
             return_value = false;
         else
         {
-            float sqrtdiscr = glm::sqrt(discr);
-            float t0 = (-B + sqrtdiscr) / (2.0f);
-            float t1 = (-B - sqrtdiscr) / (2.0f);
+            const float sqrtdiscr = glm::sqrt(discr);
+            const float t0 = (-B + sqrtdiscr) / (2.0f);
+            const float t1 = (-B - sqrtdiscr) / (2.0f);
 
-            t0 = glm::min(t0, t1);
+            const float t = glm::min(t0, t1);
 
-            if((t0 > 0.0f))
+            if((t > 0.0f))
             {
                 Intersection intersection;
 
-                intersection.distance = t0;
-                intersection.point = ray.start + t0 * ray.dir;
+                intersection.distance = t;
+                intersection.point = ray.start + t * ray.dir;
                 intersection.normal = glm::normalize(intersection.point - position);
                 intersection.solid = this;
 
@@ -137,5 +137,26 @@ namespace raytracer
     bool Sphere::intersect(const Ray &ray, intersectionList &list) const
     {
         return (this->*intersect_func)(ray, list);
+    }
+
+    Material Sphere::get_normal_material(const Vector3f &surfacePoint) const
+    {
+        return material;
+    }
+    Material Sphere::get_texture_material(const Vector3f &surfacePoint) const
+    {
+        const SphereTextureMap &text_map = *texture_map;
+        Material currentMaterial = material;
+
+        Vector3f normal = glm::normalize(position - surfacePoint);
+        Color pointColor = text_map.getTextureMapping(normal);
+
+        currentMaterial.setDiffuse(pointColor);
+
+        return currentMaterial;
+    }
+    Material Sphere::surfaceMaterial(const Vector3f &surfacePoint) const
+    {
+         return (this->*material_func)(surfacePoint);
     }
 }

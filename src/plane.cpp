@@ -19,7 +19,7 @@ namespace raytracer
                 intersection.distance = t0;
                 intersection.point = ray.start + t0 * ray.dir;
                 intersection.normal = glm::normalize(intersection.point - position);
-                //intersection.normal = -glm::normalize(Vector3f(0.0f, 1.0f, 1.0f));
+                //intersection.normal = -normal;
                 intersection.solid = this;
 
                 list.push_back(intersection);

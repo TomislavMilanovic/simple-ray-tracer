@@ -5,6 +5,7 @@
 #include "lib/lodepng/lodepng.h"
 
 #include <iostream>
+#include <ctime>
 
 const raytracer::Texture generate_texture(const std::string &filename)
 {
@@ -48,36 +49,42 @@ int main()
 
     Scene scene;
 
-    Texture earth_texture = generate_texture("earth_texture_big.png");
+    Texture earth_texture = generate_texture("textures/earth_texture_big.png");
     SphereTextureMap sphere_earth(earth_texture);
 
-    Texture height_map = generate_texture("Heightmap.png");
+    Texture height_map = generate_texture("textures/Heightmap.png");
     SphereDisplacementMap sphere_heightmap(height_map, 55.0f);
 
-
-    /*
-    scene.materials.push_back(Material(Color(1.0f, 0.0f, 0.0f), 1.0f));
-    scene.materials.push_back(Material(Color(0.0f, 1.0f, 0.0f), 1.0f)); 
-    scene.materials.push_back(Material(Color(0.0f, 1.0f, 1.0f), 0.0f)); 
-    */
-
-    //*scene.materials[2].image = better;
-
-    scene.objects.push_back(new Sphere(Vector3f(200.0f, 300.0f, 0.0f), 75.0f, Material(Color(1.0f, 0.0f, 0.0f), 0.0f), sphere_heightmap));
+    //scene.objects.push_back(new Sphere(Vector3f(200.0f, 300.0f, 0.0f), 75.0f, Material(Color(1.0f, 0.0f, 0.0f), 0.0f), sphere_heightmap));
     //scene.objects.push_back(new Sphere(Vector3f(500.0f, 300.0f, 0.0f), 75.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
-    scene.objects.push_back(new Sphere(Vector3f(500.0f, 300.0f, 0.0f), 75.0f, Material(Color(0.0f, 1.0f, 1.0f), 1.0f), sphere_earth));
+    scene.objects.push_back(new Sphere(Vector3f(200.0f, 300.0f, 100.0f), 75.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f), sphere_earth));
     scene.objects.push_back(new Plane(Vector3f(350.0f, -450.0f, 975.0f), glm::normalize(Vector3f(0.0f, 1.0f, 1.0f)), Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
-
-    //scene.objects.push_back(new Plane(Vector3f(2000.0f, 375.0f, 50.0f), glm::normalize(Vector3f(0.0f, 1.0f, 1.0f)), scene.materials[2]));
-    /*Vector3f n = glm::normalize(Vector3f(0.0f, 1.0f, 1.0f));
-    cout << n.x << " " << n.y << " " << n.z << " "<< endl;*/
-    //scene.lights.push_back(Light(Vector3f(-100.0f, -375.0f, -600.0f), Color(1.0f, 1.0f, 1.0f)));
+    scene.objects.push_back(new Triangle(
+                                Vector3f(210.0f, 230.0f, 230.0f),
+                                Vector3f(10.0f, 10.0f, 10.0f),
+                                Vector3f(10.0f, 420.0f, 10.0f),
+                                Material(Color(1.0f, 1.0f, 1.0f), 1.0f)
+                                ));
+    scene.objects.push_back(new Triangle(
+                                Vector3f(210.0f, 230.0f, 230.0f),
+                                Vector3f(210.0f, 10.0f, 230.0f),
+                                Vector3f(10.0f, 10.0f, 10.0f),
+                                Material(Color(1.0f, 1.0f, 1.0f), 1.0f)
+                                ));
 
     scene.lights.push_back(Light(Vector3f(350.0f, -375.0f, -1200.0f), Color(1.0f, 1.0f, 1.0f)));
 
+    std::cout << glm::normalize(Vector3f(0.0f, 1.0f, 1.0f)).x << " "
+              << glm::normalize(Vector3f(0.0f, 1.0f, 1.0f)).y << " "
+              << glm::normalize(Vector3f(0.0f, 1.0f, 1.0f)).z << std::endl;
 
-
+    std::clock_t begin = clock();
     scene.render(width, height, level);
+    std::clock_t end = clock();
+
+    double elapsed_secs = double(end-begin) / CLOCKS_PER_SEC;
+
+    std::cout << elapsed_secs << std::endl;
 
     return 0;
 }

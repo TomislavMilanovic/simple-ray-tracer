@@ -171,37 +171,27 @@ namespace raytracer
         Sphere(const Vector3f &pos, const float &rad, const Material &mat) : SolidObject(pos, mat), radius(rad)
         {
             intersect_func = &raytracer::Sphere::normal_intersect_wrapper;
+            material_func = &raytracer::Sphere::get_normal_material;
         }
         Sphere(const Vector3f &pos, const float &rad, const Material &mat, const SphereTextureMap &txt) : SolidObject(pos, mat), radius(rad), texture_map(&txt)
         {
             intersect_func = &raytracer::Sphere::normal_intersect_wrapper;
+            material_func = &raytracer::Sphere::get_texture_material;
         }
         Sphere(const Vector3f &pos, const float &rad, const Material &mat, const SphereDisplacementMap &disp) : SolidObject(pos, mat), radius(rad), displacement_map(&disp)
         {
             intersect_func = &raytracer::Sphere::disp_mapping_intersect_wrapper;
+            material_func = &raytracer::Sphere::get_normal_material;
+        }
+        Sphere(const Vector3f &pos, const float &rad, const Material &mat, const SphereTextureMap &txt, const SphereDisplacementMap &disp) : SolidObject(pos, mat), radius(rad), texture_map(&txt), displacement_map(&disp)
+        {
+            intersect_func = &raytracer::Sphere::disp_mapping_intersect_wrapper;
+            material_func = &raytracer::Sphere::get_texture_material;
         }
 
         bool intersect(const Ray &ray, intersectionList &list) const;
 
-        Material surfaceMaterial(const Vector3f &surfacePoint) const
-        {
-            if(texture_map == NULL)
-            {
-                return material;
-            }
-            else
-            {
-                const SphereTextureMap &text_map = *texture_map;
-                Material currentMaterial = material;
-
-                Vector3f normal = glm::normalize(position - surfacePoint);
-                Color pointColor = text_map.getTextureMapping(normal);
-
-                currentMaterial.setDiffuse(pointColor);
-
-                return currentMaterial;
-            }
-        }
+        Material surfaceMaterial(const Vector3f &surfacePoint) const;
 
         float radius;
     private:     
@@ -211,8 +201,14 @@ namespace raytracer
         bool normal_intersect_wrapper(const Ray &ray, intersectionList &list) const;
         bool disp_mapping_intersect_wrapper(const Ray &ray, intersectionList &list) const;
 
+        Material get_normal_material(const Vector3f &surfacePoint) const;
+        Material get_texture_material(const Vector3f &surfacePoint) const;
+
         typedef bool (raytracer::Sphere::*IntersectFunc) (const Ray&, intersectionList&) const;
         IntersectFunc intersect_func;
+
+        typedef Material (raytracer::Sphere::*MaterialFunc) (const Vector3f&) const;
+        MaterialFunc material_func;
 
         const SphereTextureMap *texture_map = NULL;
         const SphereDisplacementMap *displacement_map = NULL;
@@ -225,6 +221,17 @@ namespace raytracer
         bool intersect(const Ray &ray, intersectionList &list) const;
     private:
         Vector3f normal;
+    };
+
+    class Triangle : public SolidObject
+    {
+    public:
+        Triangle(const Vector3f &_v0, const Vector3f &_v1, const Vector3f &_v2, const Material &_mat) : SolidObject(Vector3f(0.0f,0.0f,0.0f), _mat), v0(_v0), v1(_v1), v2(_v2) {}
+        bool intersect(const Ray &ray, intersectionList &list) const;
+    private:
+        const Vector3f v0;
+        const Vector3f v1;
+        const Vector3f v2;
     };
 }
 
