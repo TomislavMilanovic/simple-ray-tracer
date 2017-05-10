@@ -55,28 +55,103 @@ int main()
     Texture height_map = generate_texture("textures/Heightmap.png");
     SphereDisplacementMap sphere_heightmap(height_map, 55.0f);
 
+    //left wall
+    /*
+    552.8   0.0   0.0
+    549.6   0.0 559.2
+    556.0 548.8 559.2
+    556.0 548.8   0.0
+    */
+
     //scene.objects.push_back(new Sphere(Vector3f(200.0f, 300.0f, 0.0f), 75.0f, Material(Color(1.0f, 0.0f, 0.0f), 0.0f), sphere_heightmap));
     //scene.objects.push_back(new Sphere(Vector3f(500.0f, 300.0f, 0.0f), 75.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
-    scene.objects.push_back(new Sphere(Vector3f(200.0f, 300.0f, 100.0f), 75.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f), sphere_earth));
-    scene.objects.push_back(new Plane(Vector3f(350.0f, -450.0f, 975.0f), glm::normalize(Vector3f(0.0f, 1.0f, 1.0f)), Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
-    scene.objects.push_back(new Triangle(
+    scene.objects.push_back(new Sphere(Vector3f(400.0f, 470.0f, 120.0f), 75.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f), sphere_earth));
+    //scene.objects.push_back(new Plane(Vector3f(350.0f, -450.0f, 975.0f), glm::normalize(Vector3f(0.0f, 1.0f, 1.0f)), Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
+    /*scene.objects.push_back(new Triangle(
                                 Vector3f(210.0f, 230.0f, 230.0f),
-                                Vector3f(10.0f, 10.0f, 10.0f),
+                                Vector3f(10.0f, 190.0f, 10.0f),
                                 Vector3f(10.0f, 420.0f, 10.0f),
                                 Material(Color(1.0f, 1.0f, 1.0f), 1.0f)
                                 ));
     scene.objects.push_back(new Triangle(
                                 Vector3f(210.0f, 230.0f, 230.0f),
                                 Vector3f(210.0f, 10.0f, 230.0f),
-                                Vector3f(10.0f, 10.0f, 10.0f),
+                                Vector3f(10.0f, 190.0f, 10.0f),
                                 Material(Color(1.0f, 1.0f, 1.0f), 1.0f)
+                                ));*/
+
+    //left wall
+    scene.objects.push_back(new Triangle(
+                                Vector3f(210.0f, 500.0f, 230.0f),
+                                Vector3f(210.0f, 100.0f, 230.0f),
+                                Vector3f(10.0f, 10.0f, 0.0f),
+                                Material(Color(0.0f, 0.0f, 0.0f), 1.0f)
+                                ));
+    scene.objects.push_back(new Triangle(
+                                Vector3f(210.0f, 500.0f, 230.0f),
+                                Vector3f(10.0f, 10.0f, 0.0f),
+                                Vector3f(10.0f, 590.0f, 0.0f),
+                                Material(Color(0.0f, 0.0f, 0.0f), 1.0f)
                                 ));
 
-    scene.lights.push_back(Light(Vector3f(350.0f, -375.0f, -1200.0f), Color(1.0f, 1.0f, 1.0f)));
+    //ceiling
+    scene.objects.push_back(new Triangle(
+                                Vector3f(790.0f, 10.0f, 0.0f),
+                                Vector3f(10.0f, 10.0f, 0.0f),
+                                Vector3f(210.0f, 100.0f, 230.0f),
+                                Material(Color(1.0f, 1.0f, 1.0f), 0.0f)
+                                ));
+    scene.objects.push_back(new Triangle(
+                                Vector3f(790.0f, 10.0f, 0.0f),
+                                Vector3f(210.0f, 100.0f, 230.0f),
+                                Vector3f(590.0f, 100.0f, 230.0f),
+                                Material(Color(1.0f, 1.0f, 1.0f), 0.0f)
+                                ));
 
-    std::cout << glm::normalize(Vector3f(0.0f, 1.0f, 1.0f)).x << " "
-              << glm::normalize(Vector3f(0.0f, 1.0f, 1.0f)).y << " "
-              << glm::normalize(Vector3f(0.0f, 1.0f, 1.0f)).z << std::endl;
+    //right wall
+    scene.objects.push_back(new Triangle(
+                                Vector3f(790.0f, 590.0f, 0.0f),
+                                Vector3f(790.0f, 10.0f, 0.0f),
+                                Vector3f(590.0f, 100.0f, 230.0f),
+                                Material(Color(0.0f, 1.0f, 0.0f), 0.0f)
+                                ));
+    scene.objects.push_back(new Triangle(
+                                Vector3f(790.0f, 590.0f, 0.0f),
+                                Vector3f(590.0f, 100.0f, 230.0f),
+                                Vector3f(590.0f, 500.0f, 230.0f),
+                                Material(Color(0.0f, 1.0f, 0.0f), 0.0f)
+                                ));
+
+    //back wall
+    scene.objects.push_back(new Triangle(
+                                Vector3f(590.0f, 500.0f, 230.0f),
+                                Vector3f(590.0f, 100.0f, 230.0f),
+                                Vector3f(210.0f, 100.0f, 230.0f),
+                                Material(Color(1.0f, 1.0f, 1.0f), 0.0f)
+                                ));
+    scene.objects.push_back(new Triangle(
+                                Vector3f(590.0f, 500.0f, 230.0f),
+                                Vector3f(210.0f, 100.0f, 230.0f),
+                                Vector3f(210.0f, 500.0f, 230.0f),
+                                Material(Color(1.0f, 1.0f, 1.0f), 0.0f)
+                                ));
+
+    // floor
+    scene.objects.push_back(new Triangle(
+                                Vector3f(790.0f, 590.0f, 0.0f),
+                                Vector3f(590.0f, 500.0f, 230.0f),
+                                Vector3f(210.0f, 500.0f, 230.0f),
+                                Material(Color(1.0f, 1.0f, 1.0f), 0.0f)
+                                ));
+    scene.objects.push_back(new Triangle(
+                                Vector3f(790.0f, 590.0f, 0.0f),
+                                Vector3f(210.0f, 500.0f, 230.0f),
+                                Vector3f(10.0f, 590.0f, 0.0f),
+                                Material(Color(1.0f, 1.0f, 1.0f), 0.0f)
+                                ));
+
+
+    scene.lights.push_back(Light(Vector3f(400.0f, 85.0f, 0.0f), Color(1.0f, 1.0f, 1.0f)));
 
     std::clock_t begin = clock();
     scene.render(width, height, level);
