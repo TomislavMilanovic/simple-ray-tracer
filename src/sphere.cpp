@@ -46,8 +46,6 @@ namespace raytracer
         Intersection testIntersection;
         const bool isIntersect = normal_intersect(ray, testIntersection, radius);
 
-        //std::cout << testIntersection.point.x << std::endl;
-
         if(isIntersect) list.push_back(testIntersection);
 
         return isIntersect;
@@ -78,7 +76,7 @@ namespace raytracer
                 float d_ = disp_map.getDispMapping(testIntersection.normal);
 
                 Vector3f displacedPoint = testIntersection.point + (testIntersection.normal * d_);
-                if(t == start_t && glm::length(ray.start - displacedPoint) <= 20.0f) return false;
+                if(t == start_t && glm::length(ray.start - displacedPoint) <= 5.0f) return false;
 
                 t += 0.5f;
 

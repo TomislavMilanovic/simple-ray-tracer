@@ -65,7 +65,7 @@ int main()
 
     //scene.objects.push_back(new Sphere(Vector3f(200.0f, 300.0f, 0.0f), 75.0f, Material(Color(1.0f, 0.0f, 0.0f), 0.0f), sphere_heightmap));
     //scene.objects.push_back(new Sphere(Vector3f(500.0f, 300.0f, 0.0f), 75.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
-    scene.objects.push_back(new Sphere(Vector3f(400.0f, 470.0f, 120.0f), 75.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f), sphere_earth));
+    scene.objects.push_back(new Sphere(Vector3f(400.0f, 420.0f, 120.0f), 45.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f), sphere_earth, sphere_heightmap));
     //scene.objects.push_back(new Plane(Vector3f(350.0f, -450.0f, 975.0f), glm::normalize(Vector3f(0.0f, 1.0f, 1.0f)), Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
     /*scene.objects.push_back(new Triangle(
                                 Vector3f(210.0f, 230.0f, 230.0f),
@@ -85,13 +85,13 @@ int main()
                                 Vector3f(210.0f, 500.0f, 230.0f),
                                 Vector3f(210.0f, 100.0f, 230.0f),
                                 Vector3f(10.0f, 10.0f, 0.0f),
-                                Material(Color(0.0f, 0.0f, 0.0f), 1.0f)
+                                Material(Color(1.0f, 0.0f, 0.0f), 0.5f)
                                 ));
     scene.objects.push_back(new Triangle(
                                 Vector3f(210.0f, 500.0f, 230.0f),
                                 Vector3f(10.0f, 10.0f, 0.0f),
                                 Vector3f(10.0f, 590.0f, 0.0f),
-                                Material(Color(0.0f, 0.0f, 0.0f), 1.0f)
+                                Material(Color(1.0f, 0.0f, 0.0f), 0.5f)
                                 ));
 
     //ceiling
@@ -113,13 +113,13 @@ int main()
                                 Vector3f(790.0f, 590.0f, 0.0f),
                                 Vector3f(790.0f, 10.0f, 0.0f),
                                 Vector3f(590.0f, 100.0f, 230.0f),
-                                Material(Color(0.0f, 1.0f, 0.0f), 0.0f)
+                                Material(Color(0.0f, 1.0f, 0.0f), 0.3f)
                                 ));
     scene.objects.push_back(new Triangle(
                                 Vector3f(790.0f, 590.0f, 0.0f),
                                 Vector3f(590.0f, 100.0f, 230.0f),
                                 Vector3f(590.0f, 500.0f, 230.0f),
-                                Material(Color(0.0f, 1.0f, 0.0f), 0.0f)
+                                Material(Color(0.0f, 1.0f, 0.0f), 0.3f)
                                 ));
 
     //back wall
@@ -151,7 +151,9 @@ int main()
                                 ));
 
 
-    scene.lights.push_back(Light(Vector3f(400.0f, 85.0f, 0.0f), Color(1.0f, 1.0f, 1.0f)));
+    scene.lights.push_back(Light(Vector3f(200.0f, 65.0f, 20.0f), Color(1.0f, 1.0f, 1.0f)));
+    scene.lights.push_back(Light(Vector3f(600.0f, 65.0f, 20.0f), Color(1.0f, 1.0f, 1.0f)));
+
 
     std::clock_t begin = clock();
     scene.render(width, height, level);

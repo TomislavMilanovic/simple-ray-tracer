@@ -58,8 +58,6 @@ namespace raytracer
         float coef = 1.0f;
         glm::uint16 level = lvl;
 
-        bool inShadow = false;
-
         do
         {
             Intersection *closestIntersection = NULL;
@@ -92,6 +90,8 @@ namespace raytracer
 
                 Ray lightRay(closestIntersection->point, glm::normalize(dist));
 
+                bool inShadow = false;
+
                 //Staviti da ako je sjena da završava algoritam općenito
 
                 for(glm::uint16 j = 0; j < objects.size(); ++j)
@@ -100,20 +100,28 @@ namespace raytracer
                     if(objects[j]->intersect(lightRay, testList))
                     {
                         if(testList.back().solid == closestIntersection->solid)
-                            break;
+                            continue;
+
+                        if(testList.back().distance > (glm::length(dist)))
+                            continue;
+
                         inShadow = true;
                         break;
                     }
                 }
+                testList.clear();
                 //inShadow = false;
                 if(!inShadow)
                 {
                     const Color diffuse = currentMat.diffuse();
                     float lambert = glm::dot(lightRay.dir, closestIntersection->normal) * coef;
 
-                    result.r += lambert * currentLight.intensity.r * diffuse.r;
-                    result.g += lambert * currentLight.intensity.g * diffuse.g;
-                    result.b += lambert * currentLight.intensity.b * diffuse.b;
+                    const float r2 = glm::length(dist);
+                    const Color testLightIntensity = 2000.0f * currentLight.intensity / (4.0f * glm::pi<float>() * r2);
+
+                    result.r += lambert * testLightIntensity.r * diffuse.r;
+                    result.g += lambert * testLightIntensity.g * diffuse.g;
+                    result.b += lambert * testLightIntensity.b * diffuse.b;
                 }
             }
 
@@ -174,7 +182,7 @@ namespace raytracer
         {
             for(glm::uint16 x = 0; x < width; ++x)
             {
-                img[y*width + x] = supersampling_grid(1, y, x, level);
+                img[y*width + x] = supersampling_grid(3, y, x, level);
                 //printf("height: %d width: %d\n", y, x);
             }
         }
