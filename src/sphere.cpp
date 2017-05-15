@@ -76,12 +76,12 @@ namespace raytracer
                 float d_ = disp_map.getDispMapping(testIntersection.normal);
 
                 Vector3f displacedPoint = testIntersection.point + (testIntersection.normal * d_);
-                if(t == start_t && glm::length(ray.start - displacedPoint) <= 5.0f) return false;
+                if(t == start_t && glm::length(ray.start - displacedPoint) <= 0.01f) return false;
 
-                t += 0.5f;
+                t += 0.001f;
 
                 if(//glm::dot((testPoint - displacedPoint), (testIntersection.point - testPoint)) >= 0.0f &&
-                   glm::length(testPoint - displacedPoint) <= 5.0f)
+                   glm::length(testPoint - displacedPoint) <= 0.01f)
                 {
                     Intersection intersection;
 
@@ -105,9 +105,6 @@ namespace raytracer
 
             if(!isPointInSphere(testPoint, position, radius + max_disp_df * max_disp_du))
                 return false;
-
-            /*if(t > 2000.0f)
-                return false;*/
         }
     }
     bool Sphere::disp_mapping_intersect_wrapper(const Ray &ray, intersectionList &list) const

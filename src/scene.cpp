@@ -117,7 +117,8 @@ namespace raytracer
                     float lambert = glm::dot(lightRay.dir, closestIntersection->normal) * coef;
 
                     const float r2 = glm::length(dist);
-                    const Color testLightIntensity = 2000.0f * currentLight.intensity / (4.0f * glm::pi<float>() * r2);
+                    Color testLightIntensity = 5.0f * currentLight.intensity / (4.0f * glm::pi<float>() * r2);
+                    //testLightIntensity = currentLight.intensity;
 
                     result.r += lambert * testLightIntensity.r * diffuse.r;
                     result.g += lambert * testLightIntensity.g * diffuse.g;
@@ -178,14 +179,51 @@ namespace raytracer
     {
         img.resize(width * height);
 
-        for(glm::uint16 y = 0; y < height; ++y)
+        /*for(glm::uint16 y = 0; y < height; ++y)
         {
             for(glm::uint16 x = 0; x < width; ++x)
             {
                 img[y*width + x] = supersampling_grid(3, y, x, level);
                 //printf("height: %d width: %d\n", y, x);
             }
+        }*/
+
+        //možda ukloniti float kod width
+        const float imageAspectRatio = (float)width / (float)height;
+        const float fov = 100.0f;
+        const float scale = glm::tan(glm::radians(0.5f * fov));
+        //const glm::mat4 cameraToWorld;
+
+        const glm::vec3 orig(0.0f,0.0f,0.0f);
+
+        Ray r;
+
+        for(glm::uint16 j = 0; j < height; ++j)
+        {
+            for(glm::uint16 i = 0; i < width; ++i)
+            {
+                const float x = (2.0f * (i + 0.5f) / (float)width - 1.0f) * imageAspectRatio * scale;
+                const float y = (1.0f - 2.0f * (j + 0.5f) / (float)height) * scale;
+
+                //std::cout << x << " " << y << " " << std::endl;
+
+                const glm::vec3 dir = glm::normalize(glm::vec3(x, y, -1.0f) - orig);
+
+                r.start.x = orig.x;
+                r.start.y = orig.y;
+                r.start.z = orig.z;
+
+                r.dir.x = dir.x;
+                r.dir.y = dir.y;
+                r.dir.z = dir.z;
+
+                //std::cout << dir.x << " " << dir.y << " " << dir.z << std::endl;
+
+                img[j*width + i] = trace(r, level);
+            }
         }
+
+
 
         savepng("scene_distanceSquared.png", width, height);
 
