@@ -10,6 +10,8 @@
 
 namespace raytracer
 {
+    std::vector<Vector3f> areaLightPoints;
+
     void Scene::saveppm(const std::string &filename, const glm::uint32 &width, const glm::uint32 &height)
     {
         std::ofstream file;
@@ -81,11 +83,9 @@ namespace raytracer
 
             Material currentMat = closestIntersection->solid->surfaceMaterial(closestIntersection->point);
 
-            for(glm::uint16 i = 0; i < lights.size(); ++i)
+            for(glm::uint16 i = 0; i < areaLightPoints.size(); ++i)
             {
-                Light currentLight = lights[i];
-
-                Vector3f dist = currentLight.pos - closestIntersection->point;
+                Vector3f dist = areaLightPoints[i] - closestIntersection->point;
                 if(glm::dot(closestIntersection->normal, dist) <= 0.0f) continue; //ako nikako nema svjetla
 
                 Ray lightRay(closestIntersection->point, glm::normalize(dist));
@@ -117,7 +117,7 @@ namespace raytracer
                     float lambert = glm::dot(lightRay.dir, closestIntersection->normal) * coef;
 
                     const float r2 = glm::length(dist);
-                    Color testLightIntensity = 5.0f * currentLight.intensity / (4.0f * glm::pi<float>() * r2);
+                    Color testLightIntensity = (14.0f / (float)areaLightPoints.size()) * Vector3f(1.0f, 1.0f, 1.0f) / (4.0f * glm::pi<float>() * r2);
                     //testLightIntensity = currentLight.intensity;
 
                     result.r += lambert * testLightIntensity.r * diffuse.r;
@@ -178,6 +178,39 @@ namespace raytracer
     void Scene::render(const glm::uint16 &width, const glm::uint16 &height, const glm::uint16 &level)
     {
         img.resize(width * height);
+
+        //area light prototype
+        const float wall_factor = -2.0f;
+        const float offsetY = -0.01f;
+        const Vector3f a(-0.5f, 1.0f + offsetY, -1.25f);
+        const Vector3f b(0.5f, 1.0f + offsetY, -1.25f);
+        const Vector3f c(0.5f, 1.0f + offsetY, wall_factor + 0.25f);
+        const Vector3f d(-0.5f, 1.0f + offsetY, wall_factor + 0.25f);
+
+        const float step = 0.05f;
+
+        for(float x = -0.5f; x < 0.5f; x += step)
+        {
+            for(float y = 1.0f + offsetY; y <= 1.0f + offsetY; y += step)
+            {
+                for(float z = wall_factor + 0.25f; z < -1.25f; z += step)
+                {
+                    Vector3f point(x, y, z);
+                    //std::cout << x << " " << y << " " << z << std::endl;
+                    //if(isPointInRectangle(point, a, b, d))
+                    {
+                        //std::cout << x << " " << y << " " << z << std::endl;
+                        areaLightPoints.push_back(point);
+                    }
+                    /*else
+                    {
+                        std::cout << x << " " << y << " " << z << std::endl;
+                    }*/
+                }
+            }
+        }
+
+        //std::cout << areaLightPoints[0].x << std::endl;
 
         /*for(glm::uint16 y = 0; y < height; ++y)
         {

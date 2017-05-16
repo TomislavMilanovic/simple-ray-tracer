@@ -37,6 +37,19 @@ namespace raytracer
 
         return false;
     }
+    inline bool isPointInRectangle(const Vector3f &m, const Vector3f &a, const Vector3f &b, const Vector3f &d)
+    {
+        const float am_ab = glm::dot(a*m, a*b);
+        const float ab_ab = glm::dot(a*b, a*b);
+
+        const float am_ad = glm::dot(a*m, a*d);
+        const float ad_ad = glm::dot(a*d, a*d);
+
+        if((0.0f <= am_ab && am_ab <= ab_ab) && (0.0f <= am_ad && am_ad <= ad_ad))
+            return true;
+
+        return false;
+    }
 
 
     class Ray
