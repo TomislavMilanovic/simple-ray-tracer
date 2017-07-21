@@ -152,14 +152,38 @@ namespace raytracer
         SphereDisplacementMap(const Texture& d_map, const float& du_) : DisplacementMap(d_map, du_) {}
     };
 
-
     class Light
     {
     public:
+        virtual Vector3f getDirection(const Vector3f &surfacePoint) const = 0;
+        virtual Color getIntensity(const Vector3f &surfacePoint) const = 0;
+    };
+    class PointLight : public Light
+    {
+    public:
+        Vector3f getDirection(const Vector3f &surfacePoint) const
+        {
+            return pos - surfacePoint;
+        }
+        Color getIntensity(const Vector3f &surfacePoint) const
+        {
+            return lightColor * intensity;
+        }
+        PointLight(const Vector3f &p, const Color &col, const glm::float32 &intens) : pos(p) , lightColor(col), intensity(intens){}
+    protected:
         Vector3f pos;
-        Color intensity;
-
-        Light(const Vector3f &p, const Color &intens) : pos(p) , intensity(intens){}
+        Color lightColor;
+        glm::float32 intensity;
+    };
+    class RealisticPointLight : public PointLight
+    {
+    public:
+        Color getIntensity(const Vector3f &surfacePoint) const
+        {
+            const float r2 = glm::pow(glm::length(getDirection(surfacePoint)), 1.0f);
+            return (lightColor * intensity) / (4.0f * glm::pi<float>() * r2);
+        }
+        RealisticPointLight(const Vector3f &p, const Color &col, const glm::float32 &intens) : PointLight(p, col, intens){}
     };
     class SolidObject
     {
@@ -181,7 +205,6 @@ namespace raytracer
     class Sphere : public SolidObject
     {
     public:
-
         Sphere(const Vector3f &pos, const float &rad, const Material &mat) : SolidObject(pos, mat), radius(rad)
         {
             intersect_func = &raytracer::Sphere::normal_intersect_wrapper;

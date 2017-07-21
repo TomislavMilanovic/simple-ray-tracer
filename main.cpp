@@ -55,7 +55,7 @@ int main()
     Texture height_map = generate_texture("textures/Heightmap.png");
     SphereDisplacementMap sphere_heightmap(height_map, 0.2f);
 
-    scene.objects.push_back(new Sphere(Vector3f(-0.3f, -0.55f, -1.5f), 0.3f, Material(Color(1.0f, 0.0f, 0.0f), 0.0f), sphere_earth));
+    scene.objects.push_back(new Sphere(Vector3f(-0.3f, -0.55f, -1.5f), 0.3f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)/*, sphere_earth*/));
 
     const float wall_factor = -2.0f;
     //left wall
@@ -128,27 +128,10 @@ int main()
                                     Material(Color(1.0f, 1.0f, 1.0f), 0.0f)
                                     ));
 
-    /*const float offsetY = -0.01f;
-    const Vector3f a(-0.5f, 1.0f + offsetY, -1.25f);
-    const Vector3f b(0.5f, 1.0f + offsetY, -1.25f);
-    const Vector3f c(0.5f, 1.0f + offsetY, wall_factor + 0.25f);
-    const Vector3f d(-0.5f, 1.0f + offsetY, wall_factor + 0.25f);
 
-    scene.objects.push_back(new Triangle(
-                                    b,
-                                    a,
-                                    c,
-                                    Material(Color(1.0f, 0.0f, 1.0f), 0.0f)
-                                    ));
-    scene.objects.push_back(new Triangle(
-                                    a,
-                                    d,
-                                    c,
-                                    Material(Color(1.0f, 0.0f, 1.0f), 0.0f)
-                                    ));*/
-
-    scene.lights.push_back(Light(Vector3f(-0.7f, 1.0f - 0.1f, wall_factor / 2.0f), Color(1.0f, 1.0f, 1.0f)));
-    scene.lights.push_back(Light(Vector3f(0.7f, 1.0f - 0.1f, wall_factor / 2.0f), Color(1.0f, 1.0f, 1.0f)));
+    //scene.lights.push_back(new PointLight(Vector3f(-0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
+    //scene.lights.push_back(new PointLight(Vector3f(0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
+    scene.addAreaLight();
 
     std::clock_t begin = clock();
     scene.render(width, height, level);
