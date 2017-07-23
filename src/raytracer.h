@@ -8,6 +8,7 @@
 //promijeniti pristup
 #include "../lib/glm/glm.hpp"
 #include "../lib/glm/gtc/constants.hpp"
+#include "../lib/glm/gtx/perpendicular.hpp"
 
 namespace raytracer
 {
@@ -47,6 +48,20 @@ namespace raytracer
 
         if((0.0f <= am_ab && am_ab <= ab_ab) && (0.0f <= am_ad && am_ad <= ad_ad))
             return true;
+
+        return false;
+    }
+    inline bool isEqual(const glm::float32 &x, const glm::float32 &y)
+    {
+      const glm::float32 epsilon = 0.25f;
+      return glm::abs(x - y) <= epsilon * glm::abs(x);
+    }
+    inline bool isPointBetweenTwoPoints(const Vector3f &a, const Vector3f &b, const Vector3f &c)
+    {
+        if(isEqual(glm::length(c - a) + glm::length(b - c), glm::length(b - a)))
+        {
+            return true;
+        }
 
         return false;
     }

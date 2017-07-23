@@ -12,9 +12,69 @@ namespace raytracer
 {  
     void Scene::addAreaLight()
     {
+        const Vector3f a(0.0f, 0.0f, 0.0f);
+        const Vector3f b(5.0f, 0.0f, 0.0f);
+        const Vector3f c(0.0f, 5.0f, 0.0f);
+
+        const float ab_length = glm::length(a - b);
+        const float ac_length = glm::length(a - c);
+
+        const float dot_ab_ac = glm::dot(a - b, a - c);
+
+        std::cout << "dot_ab_ac: " << dot_ab_ac << std::endl;
+
+        Vector3f normal = glm::cross((a - b), (a - c));
+        normal = glm::normalize(normal);
+
+        if(isEqual(dot_ab_ac, 0.0f))
+        {
+            std::cout << "Točke odgovaraju pravokutnom trokutu!" << std::endl;
+        }
+        else
+        {
+            std::cout << "Ne!" << std::endl;
+        }
+
+        const Ray r1(b, glm::normalize(a - b));
+        const Ray r2(c, glm::normalize(a - c));
+
+        const float t1 = ab_length / 2.0f;
+        const float t2 = ac_length / 2.0f;
+
+        for(float t_x = 0.0f; t_x < ab_length; t_x += t1)
+        {
+            for(float t_y = 0.0f; t_y < ac_length; t_y += t2)
+            {
+                Vector3f perpendicular1 = glm::normalize(glm::perp(a - b, normal));
+                Ray test_ray1(r1.start + t1 * r1.dir, perpendicular1);
+
+                Vector3f perpendicular2 = glm::normalize(glm::perp(a - c, normal));
+                Ray test_ray2(r2.start + t2 * r2.dir, perpendicular2);
+
+                glm::mat2 A(test_ray1.dir.x, -test_ray2.dir.x, test_ray1.dir.y, -test_ray2.dir.y);
+                float detA = glm::determinant(A);
+
+                glm::mat2 At1(test_ray2.start.x - test_ray1.start.x, -test_ray2.dir.x, test_ray2.start.y - test_ray1.start.y, -test_ray2.dir.y);
+
+                float detAt1 = glm::determinant(At1);
+                float t1_solution = detAt1 / detA;
+
+                glm::mat2 At2(test_ray1.dir.x, test_ray2.start.x - test_ray1.start.x, test_ray1.dir.y, test_ray2.start.y - test_ray1.start.y);
+
+                float detAt2 = glm::determinant(At2);
+                float t2_solution = detAt2 / detA;
+
+                Vector3f newPoint1 = test_ray1.start + t1_solution * test_ray1.dir;
+                Vector3f newPoint2 = test_ray2.start + t2_solution * test_ray2.dir;
+
+                std::cout << newPoint1.x << " " << newPoint1.y << " " << newPoint1.z << " " << std::endl;
+                std::cout << newPoint2.x << " " << newPoint2.y << " " << newPoint2.z << " " << std::endl;
+            }
+        }
+
         //area light prototype
-        const float wall_factor = -2.0f;
-        const float offsetY = -0.01f;
+        /*const float wall_factor = -2.0f;
+        const float offsetY = -0.1f;
         const Vector3f a(-0.5f, 1.0f + offsetY, -1.25f);
         const Vector3f b(0.5f, 1.0f + offsetY, -1.25f);
         const Vector3f c(0.5f, 1.0f + offsetY, wall_factor + 0.25f);
@@ -31,22 +91,13 @@ namespace raytracer
                 for(float z = wall_factor + 0.25f; z < -1.25f; z += step)
                 {
                     Vector3f point(x, y, z);
-                    //std::cout << x << " " << y << " " << z << std::endl;
-                    //if(isPointInRectangle(point, a, b, d))
-                    {
-                        //std::cout << x << " " << y << " " << z << std::endl;
-                        lights.push_back(new RealisticPointLight(point, Color(1.0f, 1.0f, 1.0f), 14.0f / 220.0f));
-                        num++;
-                    }
-                    /*else
-                    {
-                        std::cout << x << " " << y << " " << z << std::endl;
-                    }*/
+                    lights.push_back(new PointLight(point, Color(1.0f, 1.0f, 1.0f), 0.9f / 220.0f));
+                    num++;
                 }
             }
         }
 
-        std::cout << num << std::endl;
+        std::cout << num << std::endl;*/
     }
 
     void Scene::saveppm(const std::string &filename, const glm::uint32 &width, const glm::uint32 &height)
