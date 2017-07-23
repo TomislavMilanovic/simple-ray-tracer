@@ -131,7 +131,7 @@ int main()
 
     //scene.lights.push_back(new PointLight(Vector3f(-0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
     //scene.lights.push_back(new PointLight(Vector3f(0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
-    scene.addAreaLight();
+    scene.addAreaLightRandom(220);
 
     std::clock_t begin = clock();
     scene.render(width, height, level);

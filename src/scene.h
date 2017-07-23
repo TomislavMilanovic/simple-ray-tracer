@@ -13,7 +13,8 @@ namespace raytracer
         std::vector<SolidObject*> objects;
         std::vector<Light*> lights;
 
-        void addAreaLight();
+        void addAreaLightRandom(const int &lightNum);
+        void addAreaLightUniform(const float &step);
 
         void render(const glm::uint16 &width, const glm::uint16 &height, const glm::uint16 &level);
     private:
