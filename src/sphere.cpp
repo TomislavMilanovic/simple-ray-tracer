@@ -143,7 +143,7 @@ namespace raytracer
         const SphereTextureMap &text_map = *texture_map;
         Material currentMaterial = material;
 
-        Vector3f normal = glm::normalize(position - surfacePoint);
+        Vector3f normal = glm::normalize(surfacePoint - position);
         Color pointColor = text_map.getTextureMapping(normal);
 
         currentMaterial.setDiffuse(pointColor);

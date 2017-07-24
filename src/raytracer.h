@@ -23,7 +23,7 @@ namespace raytracer
     {
         // zamijeniti + i - za ispravne teksture
         const float u = 0.5f - (glm::atan(normal.z, normal.x)) / (2.0f*glm::pi<float>());
-        const float v = 0.5f + (glm::asin(normal.y)) / (glm::pi<float>());
+        const float v = 0.5f - (glm::asin(normal.y)) / (glm::pi<float>());
 
         return Vector2f((int)glm::floor(u * width), (int)glm::floor(v * height));
     }

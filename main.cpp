@@ -49,13 +49,13 @@ int main()
 
     Scene scene;
 
-    Texture earth_texture = generate_texture("textures/earth_texture_big.png");
+    Texture earth_texture = generate_texture("textures/world.topo.bathy.200412.3x5400x2700.png");
     SphereTextureMap sphere_earth(earth_texture);
 
     Texture height_map = generate_texture("textures/Heightmap.png");
     SphereDisplacementMap sphere_heightmap(height_map, 0.2f);
 
-    scene.objects.push_back(new Sphere(Vector3f(-0.3f, -0.55f, -1.5f), 0.3f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)/*, sphere_earth*/));
+    scene.objects.push_back(new Sphere(Vector3f(-0.3f, -0.55f, -1.5f), 0.3f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f), sphere_earth));
 
     const float wall_factor = -2.0f;
     //left wall
@@ -131,7 +131,7 @@ int main()
 
     //scene.lights.push_back(new PointLight(Vector3f(-0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
     //scene.lights.push_back(new PointLight(Vector3f(0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
-    scene.addAreaLightRandom(220);
+    scene.addAreaLightRandom(2);
 
     std::clock_t begin = clock();
     scene.render(width, height, level);
