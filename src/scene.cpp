@@ -256,20 +256,38 @@ namespace raytracer
         const float scale = glm::tan(glm::radians(0.5f * fov));
         //const glm::mat4 cameraToWorld;
 
-        const glm::vec3 orig(0.0f,0.0f,0.0f);
+        const Vector3f orig(0.0f,0.0f,0.0f);
+        Vector3f u(1.0f, 0.0f, 0.0f);
+        Vector3f v(0.0f, 1.0f, 0.0f);
+        Vector3f w(0.0f, 0.0f, -1.0f);
+
+        const glm::float32 pixelHeight = (2.0f * scale) / (float)height;
+        const glm::float32 pixelWidth = (2.0f * scale) / (float)width;
+
+        debugFloat(pixelWidth);
+
+        Vector3f scanlineStart = orig + w - ((float)width / 2.0f) * pixelWidth * u
+                + ((float)height / 2.0f) * pixelHeight * v
+                + (pixelWidth / 2.0f) * u
+                - (pixelHeight / 2.0f) * v;
+
+
+        Vector3f pixelCenter = scanlineStart;
 
         Ray r;
 
-        for(glm::uint16 j = 0; j < height; ++j)
+        for(int j = 0; j < height; ++j)
         {
-            for(glm::uint16 i = 0; i < width; ++i)
+            for(int i = 0; i < width; ++i)
             {
-                const float x = (2.0f * (i + 0.5f) / (float)width - 1.0f) * imageAspectRatio * scale;
+                /*const float x = (2.0f * (i + 0.5f) / (float)width - 1.0f) * imageAspectRatio * scale;
                 const float y = (1.0f - 2.0f * (j + 0.5f) / (float)height) * scale;
 
-                //std::cout << x << " " << y << " " << std::endl;
+                const glm::vec3 dir = glm::normalize(glm::vec3(x, y, -1.0f) - orig);*/
 
-                const glm::vec3 dir = glm::normalize(glm::vec3(x, y, -1.0f) - orig);
+                glm::vec3 dir = pixelCenter - orig;
+
+                dir = glm::normalize(dir);
 
                 r.start.x = orig.x;
                 r.start.y = orig.y;
@@ -279,10 +297,13 @@ namespace raytracer
                 r.dir.y = dir.y;
                 r.dir.z = dir.z;
 
-                //std::cout << dir.x << " " << dir.y << " " << dir.z << std::endl;
+                pixelCenter += pixelWidth * u;
 
                 img[j*width + i] = trace(r, level);
             }
+
+            scanlineStart -= pixelHeight * v;
+            pixelCenter = scanlineStart;
         }
 
         savepng("scene_distanceSquared.png", width, height);

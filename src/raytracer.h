@@ -21,7 +21,6 @@ namespace raytracer
 
     inline Vector2f UV_mapping(const Vector3f& normal, const float& height, const float& width)
     {
-        // zamijeniti + i - za ispravne teksture
         const float u = 0.5f - (glm::atan(normal.z, normal.x)) / (2.0f*glm::pi<float>());
         const float v = 0.5f - (glm::asin(normal.y)) / (glm::pi<float>());
 
@@ -66,6 +65,15 @@ namespace raytracer
         return false;
     }
 
+    inline void debugVec3f(const Vector3f &vec)
+    {
+        std::cout << vec.x << " " << vec.y << " " << vec.z << std::endl;
+    }
+
+    inline void debugFloat (const float &fl)
+    {
+        std::cout << fl << std::endl;
+    }
 
     class Ray
     {
