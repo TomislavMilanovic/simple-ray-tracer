@@ -24,7 +24,7 @@ namespace raytracer
         void savepng(const std::string &filename, const glm::uint32 &width, const glm::uint32 &height);
         Color trace(Ray &r, const glm::uint16 &lvl);
 
-        Color supersampling_grid(const int &n, const float &y, const float &x, const glm::uint16 &level);
+        Color supersampling_grid_old(const int &n, const float &y, const float &x, const glm::uint16 &level);
     };
 }
 

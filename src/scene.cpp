@@ -198,7 +198,7 @@ namespace raytracer
         return Color(glm::min(result.r*255.0f, 255.0f), glm::min(result.g*255.0f, 255.0f), glm::min(result.b*255.0f, 255.0f));
     }
 
-    Color Scene::supersampling_grid(const int &n, const float &y, const float &x, const glm::uint16 &level)
+    Color Scene::supersampling_grid_old(const int &n, const float &y, const float &x, const glm::uint16 &level)
     {
         Color avg;
         Ray r;
@@ -239,24 +239,10 @@ namespace raytracer
     {
         img.resize(width * height);
 
-        //std::cout << areaLightPoints[0].x << std::endl;
-
-        /*for(glm::uint16 y = 0; y < height; ++y)
-        {
-            for(glm::uint16 x = 0; x < width; ++x)
-            {
-                img[y*width + x] = supersampling_grid(3, y, x, level);
-                //printf("height: %d width: %d\n", y, x);
-            }
-        }*/
-
-        //možda ukloniti float kod width
-        const float imageAspectRatio = (float)width / (float)height;
         const float fov = 100.0f;
         const float scale = glm::tan(glm::radians(0.5f * fov));
-        //const glm::mat4 cameraToWorld;
 
-        const Vector3f orig(0.0f,0.0f,0.0f);
+        Vector3f orig(0.0f,0.0f,0.0f);
         Vector3f u(1.0f, 0.0f, 0.0f);
         Vector3f v(0.0f, 1.0f, 0.0f);
         Vector3f w(0.0f, 0.0f, -1.0f);
@@ -271,7 +257,6 @@ namespace raytracer
                 + (pixelWidth / 2.0f) * u
                 - (pixelHeight / 2.0f) * v;
 
-
         Vector3f pixelCenter = scanlineStart;
 
         Ray r;
@@ -280,14 +265,12 @@ namespace raytracer
         {
             for(int i = 0; i < width; ++i)
             {
-                /*const float x = (2.0f * (i + 0.5f) / (float)width - 1.0f) * imageAspectRatio * scale;
-                const float y = (1.0f - 2.0f * (j + 0.5f) / (float)height) * scale;
 
-                const glm::vec3 dir = glm::normalize(glm::vec3(x, y, -1.0f) - orig);*/
+                glm::vec3 dir = glm::normalize(pixelCenter);
 
-                glm::vec3 dir = pixelCenter - orig;
-
-                dir = glm::normalize(dir);
+                //orthographic projection
+                orig = pixelCenter - w;
+                dir = w;
 
                 r.start.x = orig.x;
                 r.start.y = orig.y;
