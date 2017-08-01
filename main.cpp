@@ -47,9 +47,9 @@ int main()
 
     const glm::uint16 width = 800, height = 800, level = 15;
 
-    Scene scene;
+    Scene scene(width, height);
 
-    Texture earth_texture = generate_texture("textures/world.topo.bathy.200412.3x5400x2700.png");
+    /*Texture earth_texture = generate_texture("textures/world.topo.bathy.200412.3x5400x2700.png");
     SphereTextureMap sphere_earth(earth_texture);
 
     Texture height_map = generate_texture("textures/Heightmap.png");
@@ -131,10 +131,16 @@ int main()
 
     //scene.lights.push_back(new PointLight(Vector3f(-0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
     //scene.lights.push_back(new PointLight(Vector3f(0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
-    scene.addAreaLightRandom(2);
+    scene.addAreaLightRandom(2);*/
+
+    scene.objects.push_back(new Sphere(Vector3f(200.0f, 300.0f, 0.0f), 75.0f, Material(Color(1.0f, 0.0f, 0.0f), 1.0f)));
+    scene.objects.push_back(new Sphere(Vector3f(500.0f, 300.0f, 0.0f), 75.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
+    scene.objects.push_back(new Plane(Vector3f(350.0f, -450.0f, 975.0f), glm::normalize(Vector3f(0.0f, 1.0f, 1.0f)), Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
+
+    scene.lights.push_back(new PointLight(Vector3f(350.0f, -375.0f, -1200.0f), Color(1.0f, 1.0f, 1.0f), 1.0f));
 
     std::clock_t begin = clock();
-    scene.render(width, height, level);
+    scene.render(level);
     std::clock_t end = clock();
 
     double elapsed_secs = double(end-begin) / CLOCKS_PER_SEC;

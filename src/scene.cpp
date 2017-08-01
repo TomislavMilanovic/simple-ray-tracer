@@ -198,29 +198,27 @@ namespace raytracer
         return Color(glm::min(result.r*255.0f, 255.0f), glm::min(result.g*255.0f, 255.0f), glm::min(result.b*255.0f, 255.0f));
     }
 
-    Color Scene::supersampling_grid_old(const int &n, const float &y, const float &x, const glm::uint16 &level)
+    Color Scene::supersampling_grid_old(Ray &r, const glm::uint16 &lvl)
     {
         Color avg;
-        Ray r;
+        Ray temp_r;
 
-        float step = (n % 2 == 0) ? (0.5f * (1.0f/(float)n)) : ((1.0f/(float)n));
+        float step = (antialiasing % 2 == 0) ? (0.5f * (1.0f/(float)antialiasing)) : ((1.0f/(float)antialiasing));
 
-        if(n % 2 != 0)
+        if(antialiasing % 2 != 0)
             step /= 2.0f;
 
         for(float i = -0.5f + step; i < 0.5f; i += step*2.0f)
         {
             for(float j = -0.5f +  step; j < 0.5f; j += step*2.0f)
             {
-                r.start.x = x + i;
-                r.start.y = y + j;
-                r.start.z = -2000.0f;
+                temp_r.start.x = r.start.x + i;
+                temp_r.start.y = r.start.y + j;
+                temp_r.start.z = r.start.z;
 
-                r.dir.x = 0.0f;
-                r.dir.y = 0.0f;
-                r.dir.z = 1.0f;
+                temp_r.dir = r.dir;
 
-                Color tmp = trace(r, level);
+                Color tmp = trace(temp_r, lvl);
 
                 avg.r += tmp.r;
                 avg.g += tmp.g;
@@ -228,65 +226,70 @@ namespace raytracer
             }
         }
 
-        avg.r /= n*n;
-        avg.g /= n*n;
-        avg.b /= n*n;
+        avg.r /= antialiasing*antialiasing;
+        avg.g /= antialiasing*antialiasing;
+        avg.b /= antialiasing*antialiasing;
 
         return avg;
     }
 
-    void Scene::render(const glm::uint16 &width, const glm::uint16 &height, const glm::uint16 &level)
+    Ray Scene::generate_rays(const int &y, const int &x)
     {
-        img.resize(width * height);
+        Ray r;
 
-        const float fov = 100.0f;
-        const float scale = glm::tan(glm::radians(0.5f * fov));
-
-        Vector3f orig(0.0f,0.0f,0.0f);
-        Vector3f u(1.0f, 0.0f, 0.0f);
-        Vector3f v(0.0f, 1.0f, 0.0f);
-        Vector3f w(0.0f, 0.0f, -1.0f);
-
+        const float scale = glm::tan(glm::radians(0.5f * projectionInfo.fov));
         const glm::float32 pixelHeight = (2.0f * scale) / (float)height;
         const glm::float32 pixelWidth = (2.0f * scale) / (float)width;
 
-        debugFloat(pixelWidth);
+        const Vector3f scanlineStart = projectionInfo.orig + projectionInfo.w - ((float)width / 2.0f) * pixelWidth * projectionInfo.u
+                + ((float)height / 2.0f) * pixelHeight * projectionInfo.v
+                + (pixelWidth / 2.0f) * projectionInfo.u
+                - (pixelHeight / 2.0f) * projectionInfo.v;
 
-        Vector3f scanlineStart = orig + w - ((float)width / 2.0f) * pixelWidth * u
-                + ((float)height / 2.0f) * pixelHeight * v
-                + (pixelWidth / 2.0f) * u
-                - (pixelHeight / 2.0f) * v;
+        const Vector3f pixelCenter = scanlineStart -
+                pixelHeight * projectionInfo.v * (glm::float32)y + pixelWidth * projectionInfo.u * (glm::float32)x;
 
-        Vector3f pixelCenter = scanlineStart;
+        if(!projectionInfo.isOrthogonal)
+        {
+            r.start = projectionInfo.orig;
+            r.dir = glm::normalize(pixelCenter);
+        }
+        else
+        {
+            r.start = pixelCenter - projectionInfo.w;
+            r.dir = projectionInfo.w;
+        }
 
+        return r;
+    }
+
+    Ray Scene::generate_rays_old(const int &y, const int &x)
+    {
         Ray r;
 
-        for(int j = 0; j < height; ++j)
+        r.start.x = x;
+        r.start.y = y;
+        r.start.z = -2000.0f;
+
+        r.dir.x = 0.0f;
+        r.dir.y = 0.0f;
+        r.dir.z = 1.0f;
+
+        return r;
+    }
+
+    void Scene::render(const glm::uint16 &level)
+    {
+        img.resize(width * height);
+
+        for(int y = 0; y < height; ++y)
         {
-            for(int i = 0; i < width; ++i)
+            for(int x = 0; x < width; ++x)
             {
-
-                glm::vec3 dir = glm::normalize(pixelCenter);
-
-                //orthographic projection
-                orig = pixelCenter - w;
-                dir = w;
-
-                r.start.x = orig.x;
-                r.start.y = orig.y;
-                r.start.z = orig.z;
-
-                r.dir.x = dir.x;
-                r.dir.y = dir.y;
-                r.dir.z = dir.z;
-
-                pixelCenter += pixelWidth * u;
-
-                img[j*width + i] = trace(r, level);
+                Ray r = generate_rays_old(y, x);
+                //img[y*width + x] = trace(r, level);
+                img[y*width + x] = supersampling_grid_old(r, level);
             }
-
-            scanlineStart -= pixelHeight * v;
-            pixelCenter = scanlineStart;
         }
 
         savepng("scene_distanceSquared.png", width, height);

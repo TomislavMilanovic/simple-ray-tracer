@@ -134,11 +134,11 @@ namespace raytracer
         return (this->*intersect_func)(ray, list);
     }
 
-    Material Sphere::get_normal_material(const Vector3f &surfacePoint) const
+    Material Sphere::get_normal_material(const Vector3f& /*surfacePoint*/) const
     {
         return material;
     }
-    Material Sphere::get_texture_material(const Vector3f &surfacePoint) const
+    Material Sphere::get_texture_material(const Vector3f& surfacePoint) const
     {
         const SphereTextureMap &text_map = *texture_map;
         Material currentMaterial = material;

@@ -178,17 +178,17 @@ namespace raytracer
     class Light
     {
     public:
-        virtual Vector3f getDirection(const Vector3f &surfacePoint) const = 0;
-        virtual Color getIntensity(const Vector3f &surfacePoint) const = 0;
+        virtual Vector3f getDirection(const Vector3f& surfacePoint) const = 0;
+        virtual Color getIntensity(const Vector3f& surfacePoint) const = 0;
     };
     class PointLight : public Light
     {
     public:
-        Vector3f getDirection(const Vector3f &surfacePoint) const
+        Vector3f getDirection(const Vector3f& surfacePoint) const
         {
             return pos - surfacePoint;
         }
-        Color getIntensity(const Vector3f &surfacePoint) const
+        Color getIntensity(const Vector3f& /*surfacePoint*/) const
         {
             return lightColor * intensity;
         }
@@ -201,7 +201,7 @@ namespace raytracer
     class RealisticPointLight : public PointLight
     {
     public:
-        Color getIntensity(const Vector3f &surfacePoint) const
+        Color getIntensity(const Vector3f& surfacePoint) const
         {
             const float r2 = glm::pow(glm::length(getDirection(surfacePoint)), 1.0f);
             return (lightColor * intensity) / (4.0f * glm::pi<float>() * r2);
@@ -213,7 +213,7 @@ namespace raytracer
     public:
          SolidObject(const Vector3f &pos, const Material &mat) : position(pos), material(mat) {}
          virtual bool intersect(const Ray &ray, intersectionList &list) const = 0;
-         virtual Material surfaceMaterial(const Vector3f &surfacePoint) const { return material; }
+         virtual Material surfaceMaterial(const Vector3f& /*surfacePoint*/) const { return material; }
          Vector3f position;
     protected:
          Material material;
@@ -261,8 +261,8 @@ namespace raytracer
         bool normal_intersect_wrapper(const Ray &ray, intersectionList &list) const;
         bool disp_mapping_intersect_wrapper(const Ray &ray, intersectionList &list) const;
 
-        Material get_normal_material(const Vector3f &surfacePoint) const;
-        Material get_texture_material(const Vector3f &surfacePoint) const;
+        Material get_normal_material(const Vector3f& surfacePoint) const;
+        Material get_texture_material(const Vector3f& surfacePoint) const;
 
         typedef bool (raytracer::Sphere::*IntersectFunc) (const Ray&, intersectionList&) const;
         IntersectFunc intersect_func;
