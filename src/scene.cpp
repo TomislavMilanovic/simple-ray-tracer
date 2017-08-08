@@ -190,7 +190,7 @@ namespace raytracer
 
             //odbijena zraka
             r.dir = glm::reflect(r.dir, closestIntersection->normal);
-            r.start = closestIntersection->point;
+            r.start = closestIntersection->point + closestIntersection->normal * 0.01f;
             level--;
 
         }while((coef > 0.0f) && (level > 0));
@@ -286,13 +286,13 @@ namespace raytracer
         {
             for(int x = 0; x < width; ++x)
             {
-                Ray r = generate_rays_old(y, x);
-                //img[y*width + x] = trace(r, level);
-                img[y*width + x] = supersampling_grid_old(r, level);
+                Ray r = generate_rays(y, x);
+                img[y*width + x] = trace(r, level);
+                //img[y*width + x] = supersampling_grid_old(r, level);
             }
         }
 
-        savepng("scene_distanceSquared.png", width, height);
+        savepng("scene.png", width, height);
 
         img.clear();
     }

@@ -166,7 +166,7 @@ namespace raytracer
     public:
         float getDispMapping(Vector3f& point) const
         {
-            const Vector2f &UV = UV_mapping(-point, displacement_map.height(), displacement_map.width());
+            const Vector2f &UV = UV_mapping(point, displacement_map.height(), displacement_map.width());
             const Color &color = displacement_map.texture(UV.x, UV.y);
             const float df = 0.3f * (color.r) + 0.59f * (color.g) + 0.11f * (color.b);
             return df * du;

@@ -61,9 +61,6 @@ namespace raytracer
         const float max_disp_df = disp_map.get_max_displacement();
         const float max_disp_du = disp_map.get_du();
 
-        if(glm::length(position - ray.start) <= radius)
-            return false;
-
         while(1)
         {
             Ray testRay(testPoint, glm::normalize(position - testPoint));
@@ -76,17 +73,15 @@ namespace raytracer
                 float d_ = disp_map.getDispMapping(testIntersection.normal);
 
                 Vector3f displacedPoint = testIntersection.point + (testIntersection.normal * d_);
-                if(t == start_t && glm::length(ray.start - displacedPoint) <= 0.01f) return false;
+                //if(t == start_t && glm::length(ray.start - displacedPoint) <= 0.01f) return false;
 
                 t += 0.001f;
 
-                if(//glm::dot((testPoint - displacedPoint), (testIntersection.point - testPoint)) >= 0.0f &&
-                   glm::length(testPoint - displacedPoint) <= 0.01f)
+                if(glm::length(testPoint - displacedPoint) <= 0.01f)
                 {
                     Intersection intersection;
 
                     intersection.distance = t;
-                    //intersection.point = testPoint;
                     intersection.point = displacedPoint;
                     intersection.normal = glm::normalize(intersection.point - position);
                     intersection.solid = this;
@@ -97,12 +92,11 @@ namespace raytracer
                 }
             }
             else
-                return false;
+                t += 0.001f;
 
             testPoint = ray.start + t*ray.dir;
 
             //testirati da li je trenutna točka unutar "proširene" sfere
-
             if(!isPointInSphere(testPoint, position, radius + max_disp_df * max_disp_du))
                 return false;
         }
@@ -123,6 +117,10 @@ namespace raytracer
         if(normal_intersect(ray, testIntersection, radius + d_))
         {
             t = testIntersection.distance;
+            return disp_mapping_intersect(ray, list, t);
+        }
+        else if(isPointInSphere(ray.start, position, radius + d_))
+        {
             return disp_mapping_intersect(ray, list, t);
         }
 
