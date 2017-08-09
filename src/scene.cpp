@@ -203,14 +203,11 @@ namespace raytracer
         Color avg;
         Ray temp_r;
 
-        float step = (antialiasing % 2 == 0) ? (0.5f * (1.0f/(float)antialiasing)) : ((1.0f/(float)antialiasing));
+        float step = (1.0f/(float)antialiasing);
 
-        if(antialiasing % 2 != 0)
-            step /= 2.0f;
-
-        for(float i = -0.5f + step; i < 0.5f; i += step*2.0f)
+        for(float i = -0.5f + step * 0.5f; i < 0.5f; i += step)
         {
-            for(float j = -0.5f +  step; j < 0.5f; j += step*2.0f)
+            for(float j = -0.5f + step * 0.5f; j < 0.5f; j += step)
             {
                 temp_r.start.x = r.start.x + i;
                 temp_r.start.y = r.start.y + j;
@@ -286,9 +283,9 @@ namespace raytracer
         {
             for(int x = 0; x < width; ++x)
             {
-                Ray r = generate_rays(y, x);
-                img[y*width + x] = trace(r, level);
-                //img[y*width + x] = supersampling_grid_old(r, level);
+                Ray r = generate_rays_old(y, x);
+                //img[y*width + x] = trace(r, level);
+                img[y*width + x] = supersampling_grid_old(r, level);
             }
         }
 

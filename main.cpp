@@ -49,13 +49,13 @@ int main()
 
     Scene scene(width, height);
 
-    Texture earth_texture = generate_texture("textures/world.topo.bathy.200412.3x5400x2700.png");
+    /*Texture earth_texture = generate_texture("textures/world.topo.bathy.200412.3x5400x2700.png");
     SphereTextureMap sphere_earth(earth_texture);
 
-    Texture height_map = generate_texture("textures/z2.png");
+    Texture height_map = generate_texture("textures/Orange-bumpmap.png");
     SphereDisplacementMap sphere_heightmap(height_map, 0.2f);
 
-    scene.objects.push_back(new Sphere(Vector3f(-0.3f, -0.75f, -1.5f), 0.3f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f), sphere_earth));
+    scene.objects.push_back(new Sphere(Vector3f(-0.3f, -0.75f, -1.5f), 0.3f, Material(Color(1.0f, 165.0f/255.0f, 0.0f), 0.0f), sphere_heightmap));
 
     const float wall_factor = -2.0f;
     //left wall
@@ -129,17 +129,17 @@ int main()
                                     ));
 
 
-    scene.lights.push_back(new PointLight(Vector3f(-0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
+    //scene.lights.push_back(new PointLight(Vector3f(-0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
     scene.lights.push_back(new PointLight(Vector3f(0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
     //scene.addAreaLightRandom(2);
-
+    */
     //Old scene
 
-    /*scene.objects.push_back(new Sphere(Vector3f(200.0f, 300.0f, 0.0f), 75.0f, Material(Color(1.0f, 0.0f, 0.0f), 1.0f)));
+    scene.objects.push_back(new Sphere(Vector3f(200.0f, 300.0f, 0.0f), 75.0f, Material(Color(1.0f, 0.0f, 0.0f), 1.0f)));
     scene.objects.push_back(new Sphere(Vector3f(500.0f, 300.0f, 0.0f), 75.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
     scene.objects.push_back(new Plane(Vector3f(350.0f, -450.0f, 975.0f), glm::normalize(Vector3f(0.0f, 1.0f, 1.0f)), Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
 
-    scene.lights.push_back(new PointLight(Vector3f(350.0f, -375.0f, -1200.0f), Color(1.0f, 1.0f, 1.0f), 1.0f));*/
+    scene.lights.push_back(new PointLight(Vector3f(350.0f, -375.0f, -1200.0f), Color(1.0f, 1.0f, 1.0f), 1.0f));
 
     std::clock_t begin = clock();
     scene.render(level);
