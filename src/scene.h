@@ -32,7 +32,7 @@ namespace raytracer
     private:
         std::vector<Color> img;
         const glm::uint16 width, height;
-        const glm::uint16 antialiasing = 5;
+        const glm::uint16 antialiasing = 4;
         const ProjectionInfo projectionInfo;
 
         void saveppm(const std::string &filename, const glm::uint32 &width, const glm::uint32 &height);

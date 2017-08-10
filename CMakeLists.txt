@@ -1,4 +1,4 @@
-list( APPEND CMAKE_CXX_FLAGS "-std=c++14 -Wall -Wextra -pedantic -o3")
+list( APPEND CMAKE_CXX_FLAGS "-std=c++14 -Wall -Wextra -pedantic -o3 -fpermissive")
 
 project(simple_ray_tracer)
 cmake_minimum_required(VERSION 2.8)

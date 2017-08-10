@@ -148,7 +148,7 @@ namespace raytracer
                 Vector3f dist = lights[i]->getDirection(closestIntersection->point);
                 if(glm::dot(closestIntersection->normal, dist) <= 0.0f) continue; //ako nikako nema svjetla
 
-                Ray lightRay(closestIntersection->point, glm::normalize(dist));
+                Ray lightRay(closestIntersection->point, glm::normalize(dist), true);
 
                 bool inShadow = false;
 
@@ -189,8 +189,7 @@ namespace raytracer
             coef *= currentMat.reflection();
 
             //odbijena zraka
-            r.dir = glm::reflect(r.dir, closestIntersection->normal);
-            r.start = closestIntersection->point + closestIntersection->normal * 0.01f;
+            r = Ray(closestIntersection->point + closestIntersection->normal * 0.01f, glm::reflect(r.dir, closestIntersection->normal));
             level--;
 
         }while((coef > 0.0f) && (level > 0));
@@ -205,15 +204,15 @@ namespace raytracer
 
         float step = (1.0f/(float)antialiasing);
 
-        for(float i = -0.5f + step * 0.5f; i < 0.5f; i += step)
+        for(float i = -0.5f; i < 0.5f; i += step)
         {
-            for(float j = -0.5f + step * 0.5f; j < 0.5f; j += step)
+            for(float j = -0.5f; j < 0.5f; j += step)
             {
-                temp_r.start.x = r.start.x + i;
-                temp_r.start.y = r.start.y + j;
-                temp_r.start.z = r.start.z;
+                Vector3f newStart(r.start.x + i, r.start.y + j, r.start.z);
+                temp_r = Ray(newStart, r.dir);
 
-                temp_r.dir = r.dir;
+                if(r.start.x == 0 && r.start.y == 0)
+                    debugVec3f(temp_r.start);
 
                 Color tmp = trace(temp_r, lvl);
 
@@ -247,30 +246,16 @@ namespace raytracer
                 pixelHeight * projectionInfo.v * (glm::float32)y + pixelWidth * projectionInfo.u * (glm::float32)x;
 
         if(!projectionInfo.isOrthogonal)
-        {
-            r.start = projectionInfo.orig;
-            r.dir = glm::normalize(pixelCenter);
-        }
+            r = Ray(projectionInfo.orig, glm::normalize(pixelCenter));
         else
-        {
-            r.start = pixelCenter - projectionInfo.w;
-            r.dir = projectionInfo.w;
-        }
+            r = Ray(pixelCenter - projectionInfo.w, projectionInfo.w);
 
         return r;
     }
 
     Ray Scene::generate_rays_old(const int &y, const int &x)
     {
-        Ray r;
-
-        r.start.x = x;
-        r.start.y = y;
-        r.start.z = -2000.0f;
-
-        r.dir.x = 0.0f;
-        r.dir.y = 0.0f;
-        r.dir.z = 1.0f;
+        Ray r(Vector3f(x, y, -2000.0f), Vector3f(0.0f, 0.0f, 1.0f));
 
         return r;
     }
@@ -284,8 +269,8 @@ namespace raytracer
             for(int x = 0; x < width; ++x)
             {
                 Ray r = generate_rays_old(y, x);
-                //img[y*width + x] = trace(r, level);
-                img[y*width + x] = supersampling_grid_old(r, level);
+                img[y*width + x] = trace(r, level);
+                //img[y*width + x] = supersampling_grid_old(r, level);
             }
         }
 

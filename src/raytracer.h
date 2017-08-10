@@ -75,12 +75,26 @@ namespace raytracer
         std::cout << fl << std::endl;
     }
 
+    inline void debugString (const std::string &str)
+    {
+        std::cout << str << std::endl;
+    }
+
     class Ray
     {
     public:
-        Ray() : start(Vector3f()), dir(Vector3f()) {}
-        Ray(const Vector3f &st, const Vector3f &d) : start(st), dir(d) {}
-        Vector3f start, dir;
+        Ray() : start(Vector3f()), dir(Vector3f()) {inv_dir = 1.0f / dir;}
+        Ray(const Vector3f &st, const Vector3f &d) : start(st), dir(d)
+        {
+            inv_dir = 1.0f / dir;
+            sign[0] = (inv_dir.x < 0);
+            sign[1] = (inv_dir.y < 0);
+            sign[2] = (inv_dir.z < 0);
+        }
+        Ray(const Vector3f &st, const Vector3f &d, const bool is_light) : start(st), dir(d), isLightRay(is_light) {inv_dir = 1.0f / dir;}
+        Vector3f start, dir, inv_dir;
+        unsigned int sign[3];
+        bool isLightRay = false;
     };
     class Material
     {
@@ -212,7 +226,7 @@ namespace raytracer
     {
     public:
          SolidObject(const Vector3f &pos, const Material &mat) : position(pos), material(mat) {}
-         virtual bool intersect(const Ray &ray, intersectionList &list) const = 0;
+         virtual bool intersect(const Ray &ray, intersectionList& list) const = 0;
          virtual Material surfaceMaterial(const Vector3f& /*surfacePoint*/) const { return material; }
          Vector3f position;
     protected:
@@ -249,7 +263,7 @@ namespace raytracer
             material_func = &raytracer::Sphere::get_texture_material;
         }
 
-        bool intersect(const Ray &ray, intersectionList &list) const;
+        bool intersect(const Ray &ray, intersectionList& list) const;
 
         Material surfaceMaterial(const Vector3f &surfacePoint) const;
 
@@ -278,7 +292,7 @@ namespace raytracer
     {
     public:
         Plane(const Vector3f &pos, const Vector3f &n, const Material &mat) : SolidObject(pos, mat), normal(n) {/*empty*/}
-        bool intersect(const Ray &ray, intersectionList &list) const;
+        bool intersect(const Ray &ray, intersectionList& list) const;
     private:
         Vector3f normal;
     };
@@ -287,11 +301,25 @@ namespace raytracer
     {
     public:
         Triangle(const Vector3f &_v0, const Vector3f &_v1, const Vector3f &_v2, const Material &_mat) : SolidObject(Vector3f(0.0f,0.0f,0.0f), _mat), v0(_v0), v1(_v1), v2(_v2) {}
-        bool intersect(const Ray &ray, intersectionList &list) const;
+        bool intersect(const Ray &ray, intersectionList& list) const;
     private:
         const Vector3f v0;
         const Vector3f v1;
         const Vector3f v2;
+    };
+
+    class AABB : public SolidObject
+    {
+    public:
+        AABB(const Vector3f &_min, const Vector3f &_max) : SolidObject(Vector3f(0.0f,0.0f,0.0f), Material(Color(), 0.0f)), bounds { _min, _max } {}
+        bool intersect(const Ray &ray, intersectionList& list) const;
+        int hits = 0;
+    private:
+        Vector3f bounds[2];
+        void inchits()
+        {
+            hits++;
+        }
     };
 }
 
