@@ -255,7 +255,7 @@ namespace raytracer
 
     Ray Scene::generate_rays_old(const int &y, const int &x)
     {
-        Ray r(Vector3f(x, y, -2000.0f), Vector3f(0.0f, 0.0f, 1.0f));
+        Ray r(Vector3f((float)x, (float)y, -2000.0f), Vector3f(0.0f, 0.0f, 1.0f));
 
         return r;
     }

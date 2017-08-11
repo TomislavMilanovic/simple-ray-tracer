@@ -83,7 +83,13 @@ namespace raytracer
     class Ray
     {
     public:
-        Ray() : start(Vector3f()), dir(Vector3f()) {inv_dir = 1.0f / dir;}
+        Ray() : start(Vector3f()), dir(Vector3f())
+        {
+            inv_dir = 1.0f / dir;
+            sign[0] = (inv_dir.x < 0);
+            sign[1] = (inv_dir.y < 0);
+            sign[2] = (inv_dir.z < 0);
+        }
         Ray(const Vector3f &st, const Vector3f &d) : start(st), dir(d)
         {
             inv_dir = 1.0f / dir;
@@ -91,9 +97,15 @@ namespace raytracer
             sign[1] = (inv_dir.y < 0);
             sign[2] = (inv_dir.z < 0);
         }
-        Ray(const Vector3f &st, const Vector3f &d, const bool is_light) : start(st), dir(d), isLightRay(is_light) {inv_dir = 1.0f / dir;}
+        Ray(const Vector3f &st, const Vector3f &d, const bool is_light) : start(st), dir(d), isLightRay(is_light)
+        {
+            inv_dir = 1.0f / dir;
+            sign[0] = (inv_dir.x < 0);
+            sign[1] = (inv_dir.y < 0);
+            sign[2] = (inv_dir.z < 0);
+        }
         Vector3f start, dir, inv_dir;
-        unsigned int sign[3];
+        int sign[3];
         bool isLightRay = false;
     };
     class Material
