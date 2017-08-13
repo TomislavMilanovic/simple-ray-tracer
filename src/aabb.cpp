@@ -86,8 +86,17 @@ namespace raytracer
         list.push_back(intersection);
 
         inchits();
-        debugFloat(hits);
+        //debugFloat(hits);
 
         return true;
+    }
+
+    const Vector3f AABB::getMinPoint() const
+    {
+        return bounds[0];
+    }
+    const Vector3f AABB::getMaxPoint() const
+    {
+        return bounds[1];
     }
 }

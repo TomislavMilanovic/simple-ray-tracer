@@ -152,4 +152,13 @@ namespace raytracer
     {
          return (this->*material_func)(surfacePoint);
     }
+
+    const Vector3f Sphere::getMinPoint() const
+    {
+        return position - radius;
+    }
+    const Vector3f Sphere::getMaxPoint() const
+    {
+        return position + radius;
+    }
 }

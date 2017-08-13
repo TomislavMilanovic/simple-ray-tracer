@@ -31,4 +31,13 @@ namespace raytracer
 
         return false;
     }
+
+    const Vector3f Plane::getMinPoint() const
+    {
+        return Vector3f() * -INFINITY;
+    }
+    const Vector3f Plane::getMaxPoint() const
+    {
+        return Vector3f() * INFINITY;
+    }
 }

@@ -135,14 +135,24 @@ int main()
     */
     //Old scene
 
-    scene.objects.push_back(new Sphere(Vector3f(200.0f, 300.0f, 0.0f), 75.0f, Material(Color(1.0f, 0.0f, 0.0f), 0.0f)));
-    //scene.objects.push_back(new Sphere(Vector3f(500.0f, 300.0f, 0.0f), 75.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
-    scene.objects.push_back(new Plane(Vector3f(350.0f, -450.0f, 975.0f), glm::normalize(Vector3f(0.0f, 1.0f, 1.0f)), Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
+    scene.objects.push_back(new Sphere(Vector3f(440.0f, 300.0f, 0.0f), 40.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
+    scene.objects.push_back(new Sphere(Vector3f(200.0f, 300.0f, 0.0f), 40.0f, Material(Color(1.0f, 0.0f, 0.0f), 0.0f)));
+    scene.objects.push_back(new Sphere(Vector3f(360.0f, 300.0f, 0.0f), 40.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
+    scene.objects.push_back(new Sphere(Vector3f(280.0f, 300.0f, 0.0f), 40.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
 
-    Vector3f min(400.0f, 400.0f, 0.0f);
-    Vector3f max(405.0f, 405.0f, 0.0f);
+    scene.objects.push_back(new Sphere(Vector3f(440.0f, 500.0f, 0.0f), 40.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
+    scene.objects.push_back(new Sphere(Vector3f(200.0f, 500.0f, 0.0f), 40.0f, Material(Color(1.0f, 0.0f, 0.0f), 0.0f)));
+    scene.objects.push_back(new Sphere(Vector3f(360.0f, 500.0f, 0.0f), 40.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
 
-    scene.objects.push_back(new AABB(min, max));
+    AABB test(scene.objects, 999);
+    scene.objects.push_back(&test);
+
+    //scene.objects.push_back(new Plane(Vector3f(350.0f, -450.0f, 975.0f), glm::normalize(Vector3f(0.0f, 1.0f, 1.0f)), Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
+
+    //Vector3f min(400.0f, 400.0f, 0.0f);
+    //Vector3f max(405.0f, 405.0f, 0.0f);
+
+    //scene.objects.push_back(new AABB(min, max));
 
     scene.lights.push_back(new PointLight(Vector3f(350.0f, -375.0f, -1200.0f), Color(1.0f, 1.0f, 1.0f), 1.0f));
 

@@ -4,6 +4,8 @@
 #include <vector>
 #include <stdio.h>
 #include <iostream>
+#include <memory>
+#include <algorithm>
 
 //promijeniti pristup
 #include "../lib/glm/glm.hpp"
@@ -69,12 +71,10 @@ namespace raytracer
     {
         std::cout << vec.x << " " << vec.y << " " << vec.z << std::endl;
     }
-
     inline void debugFloat (const float &fl)
     {
         std::cout << fl << std::endl;
     }
-
     inline void debugString (const std::string &str)
     {
         std::cout << str << std::endl;
@@ -186,7 +186,6 @@ namespace raytracer
 
         SphereTextureMap(const Texture& t_map) : TextureMap(t_map) {}
     };
-
     class SphereDisplacementMap : public DisplacementMap
     {
     public:
@@ -234,16 +233,35 @@ namespace raytracer
         }
         RealisticPointLight(const Vector3f &p, const Color &col, const glm::float32 &intens) : PointLight(p, col, intens){}
     };
+
     class SolidObject
     {
     public:
          SolidObject(const Vector3f &pos, const Material &mat) : position(pos), material(mat) {}
          virtual bool intersect(const Ray &ray, intersectionList& list) const = 0;
          virtual Material surfaceMaterial(const Vector3f& /*surfacePoint*/) const { return material; }
+
+         virtual const Vector3f getMinPoint() const = 0;
+         virtual const Vector3f getMaxPoint() const = 0;
+
          Vector3f position;
     protected:
          Material material;
     };
+    struct less_so_x
+    {
+        bool operator()(const SolidObject* a, const SolidObject* b) const { return a->position.x < b->position.x; }
+    };
+    struct less_so_y
+    {
+        bool operator()(const SolidObject* a, const SolidObject* b) const { return a->position.y < b->position.y; }
+    };
+    struct less_so_z
+    {
+        bool operator()(const SolidObject* a, const SolidObject* b) const { return a->position.z < b->position.z; }
+    };
+
+
     struct Intersection
     {
         glm::float32 distance;
@@ -279,6 +297,9 @@ namespace raytracer
 
         Material surfaceMaterial(const Vector3f &surfacePoint) const;
 
+        const Vector3f getMinPoint() const;
+        const Vector3f getMaxPoint() const;
+
         float radius;
     private:     
         bool normal_intersect(const Ray &ray, Intersection &intsc, const glm::float32 &custom_radius) const;
@@ -299,40 +320,205 @@ namespace raytracer
         const SphereTextureMap *texture_map = NULL;
         const SphereDisplacementMap *displacement_map = NULL;
     };
-
     class Plane : public SolidObject
     {
     public:
         Plane(const Vector3f &pos, const Vector3f &n, const Material &mat) : SolidObject(pos, mat), normal(n) {/*empty*/}
         bool intersect(const Ray &ray, intersectionList& list) const;
+
+        const Vector3f getMinPoint() const;
+        const Vector3f getMaxPoint() const;
     private:
         Vector3f normal;
     };
-
     class Triangle : public SolidObject
     {
     public:
-        Triangle(const Vector3f &_v0, const Vector3f &_v1, const Vector3f &_v2, const Material &_mat) : SolidObject(Vector3f(0.0f,0.0f,0.0f), _mat), v0(_v0), v1(_v1), v2(_v2) {}
+        Triangle(const Vector3f &_v0, const Vector3f &_v1, const Vector3f &_v2, const Material &_mat) : SolidObject(Vector3f(0.0f,0.0f,0.0f), _mat), v{_v0, _v1, _v2}
+        {
+            position = (1.0f / 3.0f) * (v[0] + v[1] + v[2]);
+        }
         bool intersect(const Ray &ray, intersectionList& list) const;
+
+        const Vector3f getMinPoint() const;
+        const Vector3f getMaxPoint() const;
     private:
-        const Vector3f v0;
-        const Vector3f v1;
-        const Vector3f v2;
+        const Vector3f v[3];
     };
 
     class AABB : public SolidObject
     {
+        typedef std::unique_ptr<SolidObject> ptr;
+        typedef std::vector<SolidObject*> SolidObjects;
+
     public:
         AABB(const Vector3f &_min, const Vector3f &_max) : SolidObject(Vector3f(0.0f,0.0f,0.0f), Material(Color(), 0.0f)), bounds { _min, _max } {}
+        AABB(SolidObjects& objects, int bla) : SolidObject(Vector3f(0.0f,0.0f,0.0f), Material(Color(), 0.0f))
+        {
+            bla--;
+            const int MIN_OBJECTS_PER_LEAF = 2;
+
+            if(objects.size() <= 0)
+                return;
+            else if(objects.size() == MIN_OBJECTS_PER_LEAF)
+            {
+                left = objects[0];
+                right = objects[1];
+                return;
+            }
+
+            Vector3f min = objects[0]->getMinPoint();
+            Vector3f max = objects[0]->getMaxPoint();
+
+            for(unsigned i = 1; i < objects.size(); ++i)
+            {
+                if(objects[i]->getMinPoint() == Vector3f(-INFINITY) || objects[i]->getMaxPoint() == Vector3f(INFINITY))
+                    continue;
+
+                if(objects[i]->getMinPoint().x < min.x)
+                    min.x = objects[i]->getMinPoint().x;
+
+                if(objects[i]->getMinPoint().y < min.y)
+                    min.y = objects[i]->getMinPoint().y;
+
+                if(objects[i]->getMinPoint().z < min.z)
+                    min.z = objects[i]->getMinPoint().z;
+
+                if(objects[i]->getMaxPoint().x > max.x)
+                    max.x = objects[i]->getMaxPoint().x;
+
+                if(objects[i]->getMaxPoint().y > max.y)
+                    max.y = objects[i]->getMaxPoint().y;
+
+                if(objects[i]->getMaxPoint().z > max.z)
+                    max.z = objects[i]->getMaxPoint().z;
+            }
+
+            bounds[0] = min;
+            bounds[1] = max;
+
+            Vector3f axis_select = max - min;
+            glm::float32 max_axis = glm::max(glm::max(axis_select.x, axis_select.y), axis_select.z);
+
+            if(max.x - min.x == max_axis)
+            {
+                std::sort(objects.begin(), objects.end(), less_so_x{});
+                if(bla >= 0) debugString("X");
+            }
+            else if(max.y - min.y == max_axis)
+            {
+                std::sort(objects.begin(), objects.end(), less_so_y{});
+                if(bla >= 0) debugString("Y");
+            }
+            else if(max.z - min.z == max_axis)
+            {
+                std::sort(objects.begin(), objects.end(), less_so_z{});
+                if(bla >= 0) debugString("Z");
+            }
+
+            if(bla >= 0)
+            {
+                for(unsigned i = 0; i < objects.size(); ++i)
+                {
+                    debugVec3f(objects[i]->position);
+                }
+                debugString(" ");
+            }
+
+            for(unsigned i = 0; i < objects.size(); ++i)
+            {
+                if((max.x - min.x == max_axis && objects[i]->position.x > min.x + max_axis / 2.0f) ||
+                   (max.y - min.y == max_axis && objects[i]->position.y > min.y + max_axis / 2.0f) ||
+                   (max.z - min.z == max_axis && objects[i]->position.z > min.z + max_axis / 2.0f))
+                {
+                    /*if(bla >= 0)
+                    {
+                        debugVec3f(axis_select);
+                        debugVec3f(min);
+                        debugVec3f(max);
+                        debugFloat(i);
+                        debugString(" ");
+                    }*/
+
+                    SolidObjects::const_iterator first = objects.begin();
+                    SolidObjects::const_iterator mid = objects.begin() + i;
+                    SolidObjects::const_iterator last = objects.end();
+
+                    SolidObjects first_subset(first, mid);
+                    SolidObjects second_subset(mid, last);
+
+                    left = new AABB(first_subset, bla-1);
+                    right = new AABB(second_subset, bla-1);
+
+                    return;
+                }
+            }
+        }
+
         bool intersect(const Ray &ray, intersectionList& list) const;
+
+        const Vector3f getMinPoint() const;
+        const Vector3f getMaxPoint() const;
+
         int hits = 0;
     private:
         Vector3f bounds[2];
+        SolidObject *left;
+        SolidObject *right;
         void inchits()
         {
             hits++;
         }
     };
+
+    /*
+    class AABBNode
+    {
+        typedef std::unique_ptr<AABBNode> ptr;
+        typedef std::vector<SolidObject*> SolidObjects;
+    public:
+        AABBNode(SolidObject &o) : obj(&o) {}
+        AABBNode(SolidObject &o, ptr &l, ptr &r) : obj(&o)
+        {
+            left = std::move(l);
+            right = std::move(r);
+        }
+
+        bool is_leaf()
+        {
+            return isLeaf;
+        }
+
+        void set_leaf(bool s)
+        {
+            isLeaf = s;
+        }
+
+        void buildTopDownTree(const SolidObjects& objects, const int numObjects)
+        {
+            if(objects.size() == 0)
+                return;
+
+            const unsigned MIN_OBJECTS_PER_LEAF = 2;
+
+            obj = new AABB(objects, numObjects);
+
+            if(numObjects <= MIN_OBJECTS_PER_LEAF)
+            {
+                isLeaf = false;
+                //obj =
+            }
+        }
+
+    private:
+        SolidObject *obj = NULL;
+        ptr left;
+        ptr right;
+
+        bool isLeaf = false;
+        int numObjects = 0;
+    };
+    */
 }
 
 #endif // RAYTRACER_H
