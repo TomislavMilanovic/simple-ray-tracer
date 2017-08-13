@@ -261,7 +261,6 @@ namespace raytracer
     };
     typedef std::vector<SolidObject*> SolidObjects;
 
-
     struct Intersection
     {
         glm::float32 distance;
@@ -500,8 +499,6 @@ namespace raytracer
             hits++;
         }
     };
-
-
 }
 
 #endif // RAYTRACER_H
