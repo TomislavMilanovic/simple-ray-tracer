@@ -154,7 +154,7 @@ namespace raytracer
 
                 //Staviti da ako je sjena da završava algoritam općenito
 
-                for(glm::uint16 j = 0; j < objects.size(); ++j)
+                /*for(glm::uint16 j = 0; j < objects.size(); ++j)
                 {
                     testList.clear();
                     if(objects[j]->intersect(lightRay, testList))
@@ -169,8 +169,29 @@ namespace raytracer
                         break;
                     }
                 }
+                testList.clear();*/
+
                 testList.clear();
-                //inShadow = false;
+
+                for(glm::uint16 j = 0; j < objects.size(); ++j)
+                    objects[j]->intersect(lightRay, testList);
+
+                if(!(testList.size() == 0))
+                {
+                    Intersection *lightClosestIntersection = &testList[0];
+
+                    for(glm::uint16 j = 0; j < testList.size(); ++j)
+                    {
+                        if(testList[j].distance < lightClosestIntersection->distance)
+                        {
+                            lightClosestIntersection = &testList[j];
+                        }
+                    }
+                    if(!(lightClosestIntersection->solid == closestIntersection->solid) &&
+                       !(lightClosestIntersection->distance > glm::length(dist)))
+                        inShadow = true;
+                }
+
                 if(!inShadow)
                 {
                     const Color diffuse = currentMat.diffuse();
@@ -199,6 +220,7 @@ namespace raytracer
 
     Color Scene::supersampling_grid_old(Ray &r, const glm::uint16 &lvl)
     {
+        //Izračunavati prosjek na bolji način!
         Color avg;
         Ray temp_r;
 
@@ -268,7 +290,7 @@ namespace raytracer
         {
             for(int x = 0; x < width; ++x)
             {
-                Ray r = generate_rays_old(y, x);
+                Ray r = generate_rays(y, x);
                 img[y*width + x] = trace(r, level);
                 //img[y*width + x] = supersampling_grid_old(r, level);
             }

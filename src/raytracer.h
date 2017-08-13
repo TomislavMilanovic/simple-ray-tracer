@@ -6,6 +6,7 @@
 #include <iostream>
 #include <memory>
 #include <algorithm>
+#include <iomanip>
 
 //promijeniti pristup
 #include "../lib/glm/glm.hpp"
@@ -336,6 +337,11 @@ namespace raytracer
         Triangle(const Vector3f &_v0, const Vector3f &_v1, const Vector3f &_v2, const Material &_mat) : SolidObject(Vector3f(0.0f,0.0f,0.0f), _mat), v{_v0, _v1, _v2}
         {
             position = (1.0f / 3.0f) * (v[0] + v[1] + v[2]);
+
+            /*debugVec3f(v[0], "Triangle vertices1:");
+            debugVec3f(v[1], "Triangle vertices2:");
+            debugVec3f(v[2], "Triangle vertices3:");
+            debugVec3f(position, "Triangle centroid:");*/
         }
         bool intersect(const Ray &ray, intersectionList& list) const;
 
@@ -356,9 +362,9 @@ namespace raytracer
            // debug
            for(unsigned int i = 0; i < objects.size(); ++i)
            {
-               debugVec3f(objects[i]->position);
+               //debugVec3f(objects[i]->position);
            }
-           debugString("");
+           //debugString("");
 
            if(objects.size() == 0)
                return;
@@ -381,21 +387,36 @@ namespace raytracer
            glm::float32 longest_axis_length = glm::max(glm::max(MaxMin.x, MaxMin.y), MaxMin.z);
            glm::float32 splitting_point = 0.0f;
 
+           Vector3f avg_position = Vector3f(0.0f, 0.0f, 0.0f);
+           for(unsigned int i = 0; i < objects.size(); ++i)
+           {
+               avg_position = avg_position + objects[i]->position;
+           }
+           avg_position /= (float)objects.size();
+
            if(MaxMin.x == longest_axis_length)
            {
                longest_axis = x;
                splitting_point = bounds[0].x + longest_axis_length / 2.0f;
+               splitting_point = avg_position.x;
            }
            else if(MaxMin.y == longest_axis_length)
            {
                longest_axis = y;
                splitting_point = bounds[0].y + longest_axis_length / 2.0f;
+               splitting_point = avg_position.y;
            }
            else if(MaxMin.z == longest_axis_length)
            {
                longest_axis = z;
                splitting_point = bounds[0].z + longest_axis_length / 2.0f;
+               splitting_point = avg_position.z;
            }
+
+           /*debugVec3f(bounds[0], "Min:");
+           debugVec3f(bounds[1], "Max:");
+           debugFloat(longest_axis, "Longest axis:");
+           debugFloat(splitting_point, "Spl point:");*/
 
            SolidObjects subset_1;
            SolidObjects subset_2;
@@ -426,7 +447,9 @@ namespace raytracer
            }
 
            if(subset_1.empty() || subset_2.empty())
+           {
                debugString("Neki od podskupova je prazan!");
+           }
 
            left = new AABB(subset_1);
            right = new AABB(subset_2);
