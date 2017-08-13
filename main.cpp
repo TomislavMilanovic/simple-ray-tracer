@@ -135,17 +135,21 @@ int main()
     */
     //Old scene
 
-    scene.objects.push_back(new Sphere(Vector3f(440.0f, 300.0f, 0.0f), 40.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
-    scene.objects.push_back(new Sphere(Vector3f(200.0f, 300.0f, 0.0f), 40.0f, Material(Color(1.0f, 0.0f, 0.0f), 0.0f)));
-    scene.objects.push_back(new Sphere(Vector3f(360.0f, 300.0f, 0.0f), 40.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
-    scene.objects.push_back(new Sphere(Vector3f(280.0f, 300.0f, 0.0f), 40.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
+    SolidObjects objs;
 
-    scene.objects.push_back(new Sphere(Vector3f(440.0f, 500.0f, 0.0f), 40.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
-    scene.objects.push_back(new Sphere(Vector3f(200.0f, 500.0f, 0.0f), 40.0f, Material(Color(1.0f, 0.0f, 0.0f), 0.0f)));
-    scene.objects.push_back(new Sphere(Vector3f(360.0f, 500.0f, 0.0f), 40.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
+    objs.push_back(new Sphere(Vector3f(440.0f, 300.0f, 0.0f), 40.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
+    objs.push_back(new Sphere(Vector3f(200.0f, 300.0f, 0.0f), 40.0f, Material(Color(1.0f, 0.0f, 0.0f), 0.0f)));
+    objs.push_back(new Sphere(Vector3f(360.0f, 300.0f, 0.0f), 40.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
+    objs.push_back(new Sphere(Vector3f(280.0f, 300.0f, 0.0f), 40.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
 
-    AABB test(scene.objects, 999);
-    scene.objects.push_back(&test);
+    objs.push_back(new Sphere(Vector3f(440.0f, 500.0f, 0.0f), 40.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
+    objs.push_back(new Sphere(Vector3f(200.0f, 500.0f, 0.0f), 40.0f, Material(Color(1.0f, 0.0f, 0.0f), 0.0f)));
+    objs.push_back(new Sphere(Vector3f(360.0f, 500.0f, 0.0f), 40.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
+
+    //AABB test(objs);
+    //scene.objects.push_back(&test);
+
+    scene.objects.push_back(new AABB(objs));
 
     //scene.objects.push_back(new Plane(Vector3f(350.0f, -450.0f, 975.0f), glm::normalize(Vector3f(0.0f, 1.0f, 1.0f)), Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
 

@@ -21,6 +21,8 @@ namespace raytracer
     typedef glm::vec3 Color;
     typedef std::vector<Intersection> intersectionList;
 
+    enum Axis { x, y, z };
+
     inline Vector2f UV_mapping(const Vector3f& normal, const float& height, const float& width)
     {
         const float u = 0.5f - (glm::atan(normal.z, normal.x)) / (2.0f*glm::pi<float>());
@@ -71,9 +73,17 @@ namespace raytracer
     {
         std::cout << vec.x << " " << vec.y << " " << vec.z << std::endl;
     }
+    inline void debugVec3f(const Vector3f &vec, const std::string &str)
+    {
+        std::cout << str << " " << vec.x << " " << vec.y << " " << vec.z << std::endl;
+    }
     inline void debugFloat (const float &fl)
     {
         std::cout << fl << std::endl;
+    }
+    inline void debugFloat (const float &fl, const std::string &str)
+    {
+        std::cout << str << " " << fl << std::endl;
     }
     inline void debugString (const std::string &str)
     {
@@ -248,18 +258,7 @@ namespace raytracer
     protected:
          Material material;
     };
-    struct less_so_x
-    {
-        bool operator()(const SolidObject* a, const SolidObject* b) const { return a->position.x < b->position.x; }
-    };
-    struct less_so_y
-    {
-        bool operator()(const SolidObject* a, const SolidObject* b) const { return a->position.y < b->position.y; }
-    };
-    struct less_so_z
-    {
-        bool operator()(const SolidObject* a, const SolidObject* b) const { return a->position.z < b->position.z; }
-    };
+    typedef std::vector<SolidObject*> SolidObjects;
 
 
     struct Intersection
@@ -349,32 +348,104 @@ namespace raytracer
     class AABB : public SolidObject
     {
         typedef std::unique_ptr<SolidObject> ptr;
-        typedef std::vector<SolidObject*> SolidObjects;
 
     public:
         AABB(const Vector3f &_min, const Vector3f &_max) : SolidObject(Vector3f(0.0f,0.0f,0.0f), Material(Color(), 0.0f)), bounds { _min, _max } {}
-        AABB(SolidObjects& objects, int bla) : SolidObject(Vector3f(0.0f,0.0f,0.0f), Material(Color(), 0.0f))
+        AABB(const SolidObjects& objects) : SolidObject(Vector3f(0.0f,0.0f,0.0f), Material(Color(), 0.0f))
         {
-            bla--;
-            const int MIN_OBJECTS_PER_LEAF = 2;
+           // debug
+           for(unsigned int i = 0; i < objects.size(); ++i)
+           {
+               debugVec3f(objects[i]->position);
+           }
+           debugString("");
 
-            if(objects.size() <= 0)
-                return;
-            else if(objects.size() == MIN_OBJECTS_PER_LEAF)
-            {
-                left = objects[0];
-                right = objects[1];
-                return;
-            }
+           if(objects.size() == 0)
+               return;
+           else if(objects.size() == 1)
+           {
+               left = objects[0];
+               return;
+           }
+           else if(objects.size() == 2)
+           {
+               ComputeBoundingBox(objects);
+               left = objects[0];
+               right = objects[1];
+               return;
+           }
 
+           ComputeBoundingBox(objects);
+           Axis longest_axis;
+           Vector3f MaxMin = bounds[1] - bounds[0];
+           glm::float32 longest_axis_length = glm::max(glm::max(MaxMin.x, MaxMin.y), MaxMin.z);
+           glm::float32 splitting_point = 0.0f;
+
+           if(MaxMin.x == longest_axis_length)
+           {
+               longest_axis = x;
+               splitting_point = bounds[0].x + longest_axis_length / 2.0f;
+           }
+           else if(MaxMin.y == longest_axis_length)
+           {
+               longest_axis = y;
+               splitting_point = bounds[0].y + longest_axis_length / 2.0f;
+           }
+           else if(MaxMin.z == longest_axis_length)
+           {
+               longest_axis = z;
+               splitting_point = bounds[0].z + longest_axis_length / 2.0f;
+           }
+
+           SolidObjects subset_1;
+           SolidObjects subset_2;
+
+           for(unsigned int i = 0; i < objects.size(); ++i)
+           {
+               if(longest_axis == x)
+               {
+                   if(objects[i]->position.x < splitting_point)
+                       subset_1.push_back(objects[i]);
+                   else
+                       subset_2.push_back(objects[i]);
+               }
+               else if(longest_axis == y)
+               {
+                   if(objects[i]->position.y < splitting_point)
+                       subset_1.push_back(objects[i]);
+                   else
+                       subset_2.push_back(objects[i]);
+               }
+               else if(longest_axis == z)
+               {
+                   if(objects[i]->position.z < splitting_point)
+                       subset_1.push_back(objects[i]);
+                   else
+                       subset_2.push_back(objects[i]);
+               }
+           }
+
+           if(subset_1.empty() || subset_2.empty())
+               debugString("Neki od podskupova je prazan!");
+
+           left = new AABB(subset_1);
+           right = new AABB(subset_2);
+        }
+
+        bool intersect(const Ray &ray, intersectionList& list) const;
+
+        const Vector3f getMinPoint() const;
+        const Vector3f getMaxPoint() const;
+
+        int hits = 0;
+    private:
+        void ComputeBoundingBox(const SolidObjects& objects)
+        {
             Vector3f min = objects[0]->getMinPoint();
             Vector3f max = objects[0]->getMaxPoint();
 
-            for(unsigned i = 1; i < objects.size(); ++i)
+            for(unsigned int i = 1; i < objects.size(); ++i)
             {
-                if(objects[i]->getMinPoint() == Vector3f(-INFINITY) || objects[i]->getMaxPoint() == Vector3f(INFINITY))
-                    continue;
-
                 if(objects[i]->getMinPoint().x < min.x)
                     min.x = objects[i]->getMinPoint().x;
 
@@ -396,129 +467,18 @@ namespace raytracer
 
             bounds[0] = min;
             bounds[1] = max;
-
-            Vector3f axis_select = max - min;
-            glm::float32 max_axis = glm::max(glm::max(axis_select.x, axis_select.y), axis_select.z);
-
-            if(max.x - min.x == max_axis)
-            {
-                std::sort(objects.begin(), objects.end(), less_so_x{});
-                if(bla >= 0) debugString("X");
-            }
-            else if(max.y - min.y == max_axis)
-            {
-                std::sort(objects.begin(), objects.end(), less_so_y{});
-                if(bla >= 0) debugString("Y");
-            }
-            else if(max.z - min.z == max_axis)
-            {
-                std::sort(objects.begin(), objects.end(), less_so_z{});
-                if(bla >= 0) debugString("Z");
-            }
-
-            if(bla >= 0)
-            {
-                for(unsigned i = 0; i < objects.size(); ++i)
-                {
-                    debugVec3f(objects[i]->position);
-                }
-                debugString(" ");
-            }
-
-            for(unsigned i = 0; i < objects.size(); ++i)
-            {
-                if((max.x - min.x == max_axis && objects[i]->position.x > min.x + max_axis / 2.0f) ||
-                   (max.y - min.y == max_axis && objects[i]->position.y > min.y + max_axis / 2.0f) ||
-                   (max.z - min.z == max_axis && objects[i]->position.z > min.z + max_axis / 2.0f))
-                {
-                    /*if(bla >= 0)
-                    {
-                        debugVec3f(axis_select);
-                        debugVec3f(min);
-                        debugVec3f(max);
-                        debugFloat(i);
-                        debugString(" ");
-                    }*/
-
-                    SolidObjects::const_iterator first = objects.begin();
-                    SolidObjects::const_iterator mid = objects.begin() + i;
-                    SolidObjects::const_iterator last = objects.end();
-
-                    SolidObjects first_subset(first, mid);
-                    SolidObjects second_subset(mid, last);
-
-                    left = new AABB(first_subset, bla-1);
-                    right = new AABB(second_subset, bla-1);
-
-                    return;
-                }
-            }
         }
 
-        bool intersect(const Ray &ray, intersectionList& list) const;
-
-        const Vector3f getMinPoint() const;
-        const Vector3f getMaxPoint() const;
-
-        int hits = 0;
-    private:
         Vector3f bounds[2];
-        SolidObject *left;
-        SolidObject *right;
+        SolidObject *left = NULL;
+        SolidObject *right = NULL;
         void inchits()
         {
             hits++;
         }
     };
 
-    /*
-    class AABBNode
-    {
-        typedef std::unique_ptr<AABBNode> ptr;
-        typedef std::vector<SolidObject*> SolidObjects;
-    public:
-        AABBNode(SolidObject &o) : obj(&o) {}
-        AABBNode(SolidObject &o, ptr &l, ptr &r) : obj(&o)
-        {
-            left = std::move(l);
-            right = std::move(r);
-        }
 
-        bool is_leaf()
-        {
-            return isLeaf;
-        }
-
-        void set_leaf(bool s)
-        {
-            isLeaf = s;
-        }
-
-        void buildTopDownTree(const SolidObjects& objects, const int numObjects)
-        {
-            if(objects.size() == 0)
-                return;
-
-            const unsigned MIN_OBJECTS_PER_LEAF = 2;
-
-            obj = new AABB(objects, numObjects);
-
-            if(numObjects <= MIN_OBJECTS_PER_LEAF)
-            {
-                isLeaf = false;
-                //obj =
-            }
-        }
-
-    private:
-        SolidObject *obj = NULL;
-        ptr left;
-        ptr right;
-
-        bool isLeaf = false;
-        int numObjects = 0;
-    };
-    */
 }
 
 #endif // RAYTRACER_H

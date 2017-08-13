@@ -8,15 +8,10 @@ namespace raytracer
         if(ray.isLightRay)
             return false;
 
-        /*if(ray.start.x == bounds[0].x || ray.start.y == bounds[0].y)
-            return false;
-
-        if(ray.start.x == bounds[1].x || ray.start.y == bounds[1].y)
-            return false;*/
+        if(right == NULL)
+            return left->intersect(ray, list);
 
         glm::float32 t, t_min, t_max, t_min_y, t_max_y, t_min_z, t_max_z;
-
-        Vector3f test(400.0f, 400.0f, -2000.0f);
 
         t_min = (bounds[ray.sign[0]].x - ray.start.x) * ray.inv_dir.x;
         t_max = (bounds[1 - ray.sign[0]].x - ray.start.x) * ray.inv_dir.x;
@@ -27,6 +22,7 @@ namespace raytracer
         if(std::isnan(t_min) || std::isnan(t_max) || std::isnan(t_min_y) || std::isnan(t_max_y))
             return false;
 
+        //Vector3f test(400.0f, 400.0f, -2000.0f);
         /*if(ray.start == test)
         {
             debugFloat(t_min);
@@ -76,19 +72,37 @@ namespace raytracer
                 return false;
         }
 
-        Intersection intersection;
+        bool child_intersect_1 = false;
+        bool child_intersect_2 = false;
+
+        if(left)
+        {
+            child_intersect_1 = left->intersect(ray, list);
+        }
+
+        if(right)
+        {
+            child_intersect_2 = right->intersect(ray, list);
+        }
+
+        if(child_intersect_1 || child_intersect_2)
+            return true;
+        else
+            return false;
+
+        /*Intersection intersection;
 
         intersection.distance = t;
         intersection.point = ray.start + t * ray.dir;
         intersection.normal = glm::normalize(Vector3f(0.0f, 0.0f, -1.0f));
         intersection.solid = this;
 
-        list.push_back(intersection);
+        list.push_back(intersection);*/
 
-        inchits();
+        //inchits();
         //debugFloat(hits);
 
-        return true;
+        //return true;
     }
 
     const Vector3f AABB::getMinPoint() const
