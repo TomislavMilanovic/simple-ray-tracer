@@ -34,7 +34,6 @@ namespace raytracer
             lights.push_back(new RealisticPointLight(point, Color(1.0f, 1.0f, 1.0f), 14.0f / (float)lightNum));
         }
     }
-
     void Scene::addAreaLightUniform(const float &step)
     {
         //area light prototype
@@ -112,108 +111,54 @@ namespace raytracer
 
         lodepng::encode(filename, tempBuffer, width, height);
     }
+
     Color Scene::trace(Ray &r, const glm::uint16 &lvl)
     {
         Color result;
-        intersectionList list, testList;
 
-        float coef = 1.0f;
+        float refl_coef = 1.0f;
         glm::uint16 level = lvl;
 
         do
         {
-            Intersection *closestIntersection = NULL;
-            list.clear();
+            Intersection closestIntersection;
+            if(!(getClosestIntersection(r, closestIntersection)))
+                    break;
 
-            for(glm::uint16 i = 0; i < objects.size(); ++i)
-                objects[i]->intersect(r, list);
-
-            if(list.size() == 0)
-                break;
-
-            closestIntersection = &list[0];
-
-            for(glm::uint16 i = 0; i < list.size(); ++i)
-            {
-                if(list[i].distance < closestIntersection->distance)
-                {
-                    closestIntersection = &list[i];
-                }
-            }
-
-            Material currentMat = closestIntersection->solid->surfaceMaterial(closestIntersection->point);
+            Material currentMat = closestIntersection.solid->surfaceMaterial(closestIntersection.point);
 
             for(glm::uint16 i = 0; i < lights.size(); ++i)
             {
-                Vector3f dist = lights[i]->getDirection(closestIntersection->point);
-                if(glm::dot(closestIntersection->normal, dist) <= 0.0f) continue; //ako nikako nema svjetla
+                Vector3f dist = lights[i]->getDirection(closestIntersection.point);
+                if(glm::dot(closestIntersection.normal, dist) <= 0.0f) continue; //ako nikako nema svjetla
 
-                Ray lightRay(closestIntersection->point, glm::normalize(dist), true);
+                Ray lightRay(closestIntersection.point, glm::normalize(dist), true);
 
                 bool inShadow = false;
+                Intersection lightClosestIntersection;
 
-                //Staviti da ako je sjena da završava algoritam općenito
-
-                /*for(glm::uint16 j = 0; j < objects.size(); ++j)
-                {
-                    testList.clear();
-                    if(objects[j]->intersect(lightRay, testList))
-                    {
-                        if(testList.back().solid == closestIntersection->solid)
-                            continue;
-
-                        if(testList.back().distance > (glm::length(dist)))
-                            continue;
-
-                        inShadow = true;
-                        break;
-                    }
-                }
-                testList.clear();*/
-
-                testList.clear();
-
-                for(glm::uint16 j = 0; j < objects.size(); ++j)
-                    objects[j]->intersect(lightRay, testList);
-
-                if(!(testList.size() == 0))
-                {
-                    Intersection *lightClosestIntersection = &testList[0];
-
-                    for(glm::uint16 j = 0; j < testList.size(); ++j)
-                    {
-                        if(testList[j].distance < lightClosestIntersection->distance)
-                        {
-                            lightClosestIntersection = &testList[j];
-                        }
-                    }
-                    if(!(lightClosestIntersection->solid == closestIntersection->solid) &&
-                       !(lightClosestIntersection->distance > glm::length(dist)))
-                        inShadow = true;
-                }
+                if((getClosestIntersection(lightRay, lightClosestIntersection)) &&
+                   !(lightClosestIntersection.solid == closestIntersection.solid) &&
+                   !(lightClosestIntersection.distance > glm::length(dist)))
+                    inShadow = true;
 
                 if(!inShadow)
                 {
                     const Color diffuse = currentMat.diffuse();
-                    float lambert = glm::dot(lightRay.dir, closestIntersection->normal) * coef;
+                    const float lambert = glm::dot(lightRay.dir, closestIntersection.normal) * refl_coef;
+                    const Color testLightIntensity = lights[i]->getIntensity(closestIntersection.point);
 
-                    //Color testLightIntensity = (14.0f / (float)areaLightPoints.size()) * Vector3f(1.0f, 1.0f, 1.0f) / (4.0f * glm::pi<float>() * r2);
-
-                    const Color testLightIntensity = lights[i]->getIntensity(closestIntersection->point);
-
-                    result.r += lambert * testLightIntensity.r * diffuse.r;
-                    result.g += lambert * testLightIntensity.g * diffuse.g;
-                    result.b += lambert * testLightIntensity.b * diffuse.b;
+                    result += lambert * testLightIntensity * diffuse;
                 }
             }
 
-            coef *= currentMat.reflection();
+            refl_coef *= currentMat.reflection();
 
             //odbijena zraka
-            r = Ray(closestIntersection->point + closestIntersection->normal * 0.01f, glm::reflect(r.dir, closestIntersection->normal));
+            r = Ray(closestIntersection.point + closestIntersection.normal * 0.01f, glm::reflect(r.dir, closestIntersection.normal));
             level--;
 
-        }while((coef > 0.0f) && (level > 0));
+        }while((refl_coef > 0.0f) && (level > 0));
 
         return Color(glm::min(result.r*255.0f, 255.0f), glm::min(result.g*255.0f, 255.0f), glm::min(result.b*255.0f, 255.0f));
     }
@@ -235,19 +180,13 @@ namespace raytracer
 
                 Color tmp = trace(temp_r, lvl);
 
-                avg.r += tmp.r;
-                avg.g += tmp.g;
-                avg.b += tmp.b;
+                avg += tmp;
             }
         }
 
-        avg.r /= antialiasing*antialiasing;
-        avg.g /= antialiasing*antialiasing;
-        avg.b /= antialiasing*antialiasing;
-
+        avg /= antialiasing*antialiasing;
         return avg;
     }
-
     Color Scene::supersampling_grid(Ray &r, const glm::uint16 &lvl)
     {
         Color avg = Color(0.0f, 0.0f, 0.0f);
@@ -325,6 +264,27 @@ namespace raytracer
 
         img.clear();
         debugString("Render ended.");
+    }
+
+    bool Scene::getClosestIntersection(const Ray& r, Intersection& closestIntersection)
+    {
+        intersectionList list;
+
+        for(glm::uint16 i = 0; i < objects.size(); ++i)
+            objects[i]->intersect(r, list);
+
+        if(list.size() == 0)
+            return false;
+
+       closestIntersection = list[0];
+
+        for(glm::uint16 i = 0; i < list.size(); ++i)
+        {
+            if(list[i].distance < closestIntersection.distance)
+                closestIntersection = list[i];
+        }
+
+        return true;
     }
 }
 

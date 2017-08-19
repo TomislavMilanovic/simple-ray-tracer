@@ -49,7 +49,7 @@ namespace raytracer
     private:
         std::vector<Color> img;
         const glm::uint16 width, height;
-        const glm::uint16 antialiasing = 3;
+        const glm::uint16 antialiasing = 1;
         ProjectionInfo projectionInfo;
 
         void saveppm(const std::string &filename, const glm::uint32 &width, const glm::uint32 &height);
@@ -61,6 +61,8 @@ namespace raytracer
 
         Ray generate_rays(const int &y, const int &x);
         Ray generate_rays_old(const int &y, const int &x);
+
+        bool getClosestIntersection(const Ray& r, Intersection& closestIntersection);
     };
 }
 

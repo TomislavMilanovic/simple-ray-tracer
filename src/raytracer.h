@@ -94,30 +94,20 @@ namespace raytracer
     class Ray
     {
     public:
-        Ray() : start(Vector3f()), dir(Vector3f())
-        {
-            inv_dir = 1.0f / dir;
-            sign[0] = (inv_dir.x < 0);
-            sign[1] = (inv_dir.y < 0);
-            sign[2] = (inv_dir.z < 0);
-        }
-        Ray(const Vector3f &st, const Vector3f &d) : start(st), dir(d)
-        {
-            inv_dir = 1.0f / dir;
-            sign[0] = (inv_dir.x < 0);
-            sign[1] = (inv_dir.y < 0);
-            sign[2] = (inv_dir.z < 0);
-        }
-        Ray(const Vector3f &st, const Vector3f &d, const bool is_light) : start(st), dir(d), isLightRay(is_light)
-        {
-            inv_dir = 1.0f / dir;
-            sign[0] = (inv_dir.x < 0);
-            sign[1] = (inv_dir.y < 0);
-            sign[2] = (inv_dir.z < 0);
-        }
+        Ray() : start(Vector3f()), dir(Vector3f()) { calc_cache(); }
+        Ray(const Vector3f &st, const Vector3f &d) : start(st), dir(d) { calc_cache(); }
+        Ray(const Vector3f &st, const Vector3f &d, const bool is_light) : start(st), dir(d), isLightRay(is_light) { calc_cache(); }
         Vector3f start, dir, inv_dir;
         int sign[3];
         bool isLightRay = false;
+    private:
+        void calc_cache()
+        {
+            inv_dir = 1.0f / dir;
+            sign[0] = (inv_dir.x < 0);
+            sign[1] = (inv_dir.y < 0);
+            sign[2] = (inv_dir.z < 0);
+        }
     };
     class Material
     {
@@ -386,31 +376,14 @@ namespace raytracer
            glm::float32 longest_axis_length = glm::max(glm::max(MaxMin.x, MaxMin.y), MaxMin.z);
            glm::float32 splitting_point = 0.0f;
 
-           Vector3f avg_position = Vector3f(0.0f, 0.0f, 0.0f);
-           for(unsigned int i = 0; i < objects.size(); ++i)
-           {
-               avg_position = avg_position + objects[i]->position;
-           }
-           avg_position /= (float)objects.size();
-
            if(MaxMin.x == longest_axis_length)
-           {
                longest_axis = x;
-               splitting_point = bounds[0].x + longest_axis_length / 2.0f;
-               splitting_point = avg_position.x;
-           }
            else if(MaxMin.y == longest_axis_length)
-           {
                longest_axis = y;
-               splitting_point = bounds[0].y + longest_axis_length / 2.0f;
-               splitting_point = avg_position.y;
-           }
            else if(MaxMin.z == longest_axis_length)
-           {
                longest_axis = z;
-               splitting_point = bounds[0].z + longest_axis_length / 2.0f;
-               splitting_point = avg_position.z;
-           }
+
+           splitting_point = ComputeSpatialMedian(longest_axis, longest_axis_length);
 
            /*debugVec3f(bounds[0], "Min:");
            debugVec3f(bounds[1], "Max:");
@@ -420,6 +393,7 @@ namespace raytracer
            SolidObjects subset_1;
            SolidObjects subset_2;
 
+           create_subsets:
            for(unsigned int i = 0; i < objects.size(); ++i)
            {
                if(longest_axis == x)
@@ -447,7 +421,12 @@ namespace raytracer
 
            if(subset_1.empty() || subset_2.empty())
            {
-               debugString("Neki od podskupova je prazan!");
+               subset_1.clear();
+               subset_2.clear();
+
+               splitting_point = ComputeObjectMean(longest_axis, objects);
+
+               goto create_subsets;
            }
 
            left = new AABB(subset_1);
@@ -489,6 +468,32 @@ namespace raytracer
 
             bounds[0] = min;
             bounds[1] = max;
+        }
+        glm::float32 ComputeSpatialMedian(const Axis longest_axis, const glm::float32 longest_axis_length)
+        {
+            if(longest_axis == x)
+                return bounds[0].x + longest_axis_length / 2.0f;
+            else if(longest_axis == y)
+                return bounds[0].y + longest_axis_length / 2.0f;
+            else
+                return bounds[0].z + longest_axis_length / 2.0f;
+        }
+
+        glm::float32 ComputeObjectMean(const Axis longest_axis, const SolidObjects& objects)
+        {
+            Vector3f avg_position;
+            for(unsigned int i = 0; i < objects.size(); ++i)
+            {
+                avg_position = avg_position + objects[i]->position;
+            }
+            avg_position /= (float)objects.size();
+
+            if(longest_axis == x)
+                return avg_position.x;
+            else if(longest_axis == y)
+                return avg_position.y;
+            else
+                return avg_position.z;
         }
 
         Vector3f bounds[2];

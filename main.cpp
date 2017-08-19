@@ -172,9 +172,9 @@ int main()
 
 
     scene.objects.push_back(new AABB(objs));
-    scene.addAreaLightUniform(0.05f);
-    //scene.lights.push_back(new PointLight(Vector3f(-0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
-    //scene.lights.push_back(new PointLight(Vector3f(0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
+    //scene.addAreaLightUniform(0.05f);
+    scene.lights.push_back(new PointLight(Vector3f(-0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
+    scene.lights.push_back(new PointLight(Vector3f(0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
     //scene.addAreaLightRandom(2);
 
     //Old scene
@@ -202,7 +202,7 @@ int main()
 
     double elapsed_secs = double(end-begin) / CLOCKS_PER_SEC;
 
-    std::cout << elapsed_secs << std::endl;
+    std::cout << "Elapsed time: " << elapsed_secs << " s" << std::endl;
 
     return 0;
 }
