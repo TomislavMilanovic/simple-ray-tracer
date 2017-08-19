@@ -27,7 +27,6 @@ namespace raytracer
         intersection.distance = glm::dot(v0v2, qvec) * invDet;
         intersection.point = ray.start + intersection.distance*ray.dir;
         intersection.normal = glm::normalize(glm::cross(v0v1, v0v2));
-        //intersection.normal = glm::normalize(Vector3f(0.0f, 0.0f, -1.0f));
         intersection.solid = this;
 
         list.push_back(intersection);

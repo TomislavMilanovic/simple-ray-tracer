@@ -5,8 +5,6 @@
 
 #include <typeinfo>
 #include <vector>
-
-//promijeniti pristup
 #include "../lib/lodepng/lodepng.h"
 
 namespace raytracer
@@ -71,21 +69,22 @@ namespace raytracer
         std::cout << num << std::endl;
     }
 
-    void Scene::saveppm(const std::string &filename, const glm::uint32 &width, const glm::uint32 &height)
+    void Scene::saveppm()
     {
         std::ofstream file;
+        const std::string new_filename = filename + ".ppm";
 
-        file.open(filename.c_str(), std::ios::out | std::ios::binary);
+        file.open(new_filename.c_str(), std::ios::out | std::ios::binary);
         file << "P6 " << width << " " << height << " " << "255\n";
 
-        for(glm::uint32 i = 0; i < width * height; ++i)
+        for(glm::uint32 i = 0; i < (glm::uint32)width * height; ++i)
         {
             file << (unsigned char)img[i].r << (unsigned char)img[i].g << (unsigned char)img[i].b;
         }
 
         file.close();
     }
-    void Scene::savepng(const std::string &filename, const glm::uint32 &width, const glm::uint32 &height)
+    void Scene::savepng()
     {
         const unsigned char ALPHA = 255;
 
@@ -109,7 +108,7 @@ namespace raytracer
 
         }
 
-        lodepng::encode(filename, tempBuffer, width, height);
+        lodepng::encode(filename + ".png", tempBuffer, width, height);
     }
 
     Color Scene::trace(Ray &r, const glm::uint16 &lvl)
@@ -165,7 +164,6 @@ namespace raytracer
 
     Color Scene::supersampling_grid_old(Ray &r, const glm::uint16 &lvl)
     {
-        //Izračunavati prosjek na bolji način!
         Color avg;
         Ray temp_r;
 
@@ -191,26 +189,27 @@ namespace raytracer
     {
         Color avg = Color(0.0f, 0.0f, 0.0f);
         Ray temp_r;
+        ProjectionInfo& projInfo = *projectionInfo;
 
-        const float step_x = (projectionInfo.pixelWidth / (float)antialiasing);
-        const float step_y = (projectionInfo.pixelHeight / (float)antialiasing);
+        const float step_x = (projInfo.pixelWidth / (float)antialiasing);
+        const float step_y = (projInfo.pixelHeight / (float)antialiasing);
 
-        const float pw_half = projectionInfo.pixelWidth * 0.5f;
-        const float ph_half = projectionInfo.pixelHeight * 0.5f;
+        const float pw_half = projInfo.pixelWidth * 0.5f;
+        const float ph_half = projInfo.pixelHeight * 0.5f;
 
         for(float i = -pw_half + step_x * pw_half; i < pw_half; i += step_x)
         {
             for(float j = -ph_half + step_y * ph_half; j < ph_half; j += step_y)
             {
-                if(!projectionInfo.isOrthogonal)
+                if(!projInfo.isOrthogonal)
                 {
-                    Vector3f newDir = r.dir + i * projectionInfo.u + j * projectionInfo.v;
+                    Vector3f newDir = r.dir + i * projInfo.u + j * projInfo.v;
                     newDir = glm::normalize(newDir);
                     temp_r = Ray(r.start, newDir);
                 }
                 else
                 {
-                    Vector3f newStart = r.start + i * projectionInfo.u + j * projectionInfo.v;
+                    Vector3f newStart = r.start + i * projInfo.u + j * projInfo.v;
                     temp_r = Ray(newStart, r.dir);
                 }
 
@@ -227,14 +226,15 @@ namespace raytracer
     Ray Scene::generate_rays(const int &y, const int &x)
     {
         Ray r;
+        ProjectionInfo& projInfo = *projectionInfo;
 
-        const Vector3f pixelCenter = projectionInfo.scanlineStart -
-                projectionInfo.pixelHeight * projectionInfo.v * (glm::float32)y + projectionInfo.pixelWidth * projectionInfo.u * (glm::float32)x;
+        const Vector3f pixelCenter = projInfo.scanlineStart -
+                projInfo.pixelHeight * projInfo.v * (glm::float32)y + projInfo.pixelWidth * projInfo.u * (glm::float32)x;
 
-        if(!projectionInfo.isOrthogonal)
-            r = Ray(projectionInfo.orig, pixelCenter);
+        if(!projInfo.isOrthogonal)
+            r = Ray(projInfo.orig, pixelCenter);
         else
-            r = Ray(pixelCenter, projectionInfo.w);
+            r = Ray(pixelCenter, projInfo.w);
 
         return r;
     }
@@ -260,7 +260,7 @@ namespace raytracer
             }
         }
 
-        savepng("scene.png", width, height);
+        savepng();
 
         img.clear();
         debugString("Render ended.");
