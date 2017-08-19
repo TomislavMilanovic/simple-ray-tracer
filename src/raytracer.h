@@ -8,7 +8,6 @@
 #include <algorithm>
 #include <iomanip>
 
-//promijeniti pristup
 #include "../lib/glm/glm.hpp"
 #include "../lib/glm/gtc/constants.hpp"
 #include "../lib/glm/gtx/perpendicular.hpp"
@@ -149,12 +148,21 @@ namespace raytracer
         virtual float getDispMapping(Vector3f& point) const = 0;
 
         const float& get_max_displacement() const {return max_displacement;}
-        const float& get_du() const {return du;}
 
-        DisplacementMap(const Texture& d_map, const float& du_) : displacement_map(d_map), du(du_), max_displacement(calculate_max_displacement()) {}
+        const float& get_du() const {return du;}
+        const float& get_step() const {return step;}
+        const float& get_epsilon() const {return epsilon;}
+
+        void set_du(const float _du) {du = _du;}
+        void set_step(const float _step) {step = _step;}
+        void set_epsilon(const float _eps) {epsilon = _eps;}
+
+        DisplacementMap(const Texture& d_map, const float& _du, const float& _stp, const float& _eps) : displacement_map(d_map), du(_du), step(_stp), epsilon(_eps), max_displacement(calculate_max_displacement()) {}
     protected:
         Texture displacement_map;
-        const float du;
+        float du;
+        float step;
+        float epsilon;
         const float max_displacement;
     private:
         float calculate_max_displacement() const
@@ -198,7 +206,7 @@ namespace raytracer
             return df * du;
         }
 
-        SphereDisplacementMap(const Texture& d_map, const float& du_) : DisplacementMap(d_map, du_) {}
+        SphereDisplacementMap(const Texture& d_map, const float& _du, const float& _stp, const float& _eps) : DisplacementMap(d_map, _du, _stp, _eps) {}
     };
 
     class Light

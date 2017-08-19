@@ -69,6 +69,51 @@ namespace raytracer
         std::cout << num << std::endl;
     }
 
+    const glm::uint16& Scene::get_antialiasing() const { return antialiasing; }
+    void Scene::set_antialiasing(const glm::uint16 aa)
+    {
+        antialiasing = aa;
+
+        if(aa <= 1)
+        {
+            rays_func = (projectionInfo) ? &raytracer::Scene::generate_rays : &raytracer::Scene::generate_rays_old;
+            aa_func = &raytracer::Scene::trace;
+        }
+        else
+        {
+            rays_func = (projectionInfo) ? &raytracer::Scene::generate_rays : &raytracer::Scene::generate_rays_old;
+            aa_func = (projectionInfo) ? &raytracer::Scene::supersampling_grid : &raytracer::Scene::supersampling_grid_old;
+        }
+    }
+    void Scene::set_image_format(const ImageFormat f)
+    {
+        switch(f)
+        {
+            case ppm:
+                output_func = &raytracer::Scene::saveppm;
+                break;
+            case png:
+                output_func = &raytracer::Scene::savepng;
+                break;
+            default:
+                output_func = &raytracer::Scene::savepng;
+                break;
+        }
+    }
+    void Scene::set_projection_info(const float fov, const Vector3f orig, const Vector3f u, const Vector3f v, const Vector3f w, const bool isOrthogonal)
+    {
+        if(projectionInfo)
+        {
+            projectionInfo->fov = fov;
+            projectionInfo->orig = orig;
+            projectionInfo->u = u;
+            projectionInfo->v = v;
+            projectionInfo->w = w;
+            projectionInfo->isOrthogonal = isOrthogonal;
+            projectionInfo->calc_cache(width, height);
+        }
+    }
+
     void Scene::saveppm() const
     {
         std::ofstream file;
@@ -255,10 +300,6 @@ namespace raytracer
         {
             for(int x = 0; x < width; ++x)
             {
-                //Ray r = generate_rays(y, x);
-                //img[y*width + x] = trace(r);
-                //img[y*width + x] = supersampling_grid(r);
-
                 const Ray r = (this->*rays_func)(y, x);
                 img[y*width + x] = (this->*aa_func)(r);
             }
@@ -289,8 +330,5 @@ namespace raytracer
 
         return true;
     }
-
-
-
 }
 

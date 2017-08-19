@@ -73,11 +73,10 @@ namespace raytracer
                 float d_ = disp_map.getDispMapping(testIntersection.normal);
 
                 Vector3f displacedPoint = testIntersection.point + (testIntersection.normal * d_);
-                //if(t == start_t && glm::length(ray.start - displacedPoint) <= 0.01f) return false;
 
-                t += 0.001f;
+                t += disp_map.get_step();
 
-                if(glm::length(testPoint - displacedPoint) <= 0.01f)
+                if(glm::length(testPoint - displacedPoint) <= disp_map.get_epsilon())
                 {
                     Intersection intersection;
 
@@ -92,7 +91,7 @@ namespace raytracer
                 }
             }
             else
-                t += 0.001f;
+                t += disp_map.get_step();
 
             testPoint = ray.start + t*ray.dir;
 
@@ -150,7 +149,7 @@ namespace raytracer
     }
     Material Sphere::surfaceMaterial(const Vector3f &surfacePoint) const
     {
-         return (this->*material_func)(surfacePoint);
+        return (this->*material_func)(surfacePoint);
     }
 
     const Vector3f Sphere::getMinPoint() const

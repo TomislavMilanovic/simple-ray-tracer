@@ -18,7 +18,7 @@ int main()
     SphereTextureMap sphere_earth(earth_texture);
 
     Texture height_map = generate_texture("textures/Orange-bumpmap.png");
-    SphereDisplacementMap sphere_heightmap(height_map, 0.2f);
+    SphereDisplacementMap sphere_heightmap(height_map, 0.2f, 0.001f, 0.01f);
 
     /*scene.objects.push_back(new Sphere(Vector3f(-0.3f, -0.75f, -1.5f), 0.3f, Material(Color(1.0f, 165.0f/255.0f, 0.0f), 0.0f), sphere_earth));
 
