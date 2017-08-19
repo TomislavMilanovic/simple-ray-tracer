@@ -11,8 +11,8 @@ int main()
 
     const glm::uint16 width = 800, height = 800, level = 15;
 
-    Scene::ProjectionInfo proj_info(width, height);
-    Scene scene(width, height, level, 1, "scene1", proj_info);
+    Scene::ProjectionInfo proj_info(false);
+    Scene scene(width, height, level, 1, "scene2", Scene::png, proj_info);
 
     Texture earth_texture = generate_texture("textures/world.topo.bathy.200412.3x5400x2700.png");
     SphereTextureMap sphere_earth(earth_texture);
@@ -198,7 +198,7 @@ int main()
     scene.lights.push_back(new PointLight(Vector3f(350.0f, -375.0f, -1200.0f), Color(1.0f, 1.0f, 1.0f), 1.0f));*/
 
     std::clock_t begin = clock();
-    scene.render(level);
+    scene.render();
     std::clock_t end = clock();
 
     double elapsed_secs = double(end-begin) / CLOCKS_PER_SEC;

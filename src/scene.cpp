@@ -69,7 +69,7 @@ namespace raytracer
         std::cout << num << std::endl;
     }
 
-    void Scene::saveppm()
+    void Scene::saveppm() const
     {
         std::ofstream file;
         const std::string new_filename = filename + ".ppm";
@@ -84,7 +84,7 @@ namespace raytracer
 
         file.close();
     }
-    void Scene::savepng()
+    void Scene::savepng() const
     {
         const unsigned char ALPHA = 255;
 
@@ -111,12 +111,13 @@ namespace raytracer
         lodepng::encode(filename + ".png", tempBuffer, width, height);
     }
 
-    Color Scene::trace(Ray &r, const glm::uint16 &lvl)
+    Color Scene::trace(const Ray& ray) const
     {
         Color result;
+        Ray r = ray;
 
         float refl_coef = 1.0f;
-        glm::uint16 level = lvl;
+        glm::uint16 lvl = level;
 
         do
         {
@@ -155,14 +156,14 @@ namespace raytracer
 
             //odbijena zraka
             r = Ray(closestIntersection.point + closestIntersection.normal * 0.01f, glm::reflect(r.dir, closestIntersection.normal));
-            level--;
+            lvl--;
 
-        }while((refl_coef > 0.0f) && (level > 0));
+        }while((refl_coef > 0.0f) && (lvl > 0));
 
         return Color(glm::min(result.r*255.0f, 255.0f), glm::min(result.g*255.0f, 255.0f), glm::min(result.b*255.0f, 255.0f));
     }
 
-    Color Scene::supersampling_grid_old(Ray &r, const glm::uint16 &lvl)
+    Color Scene::supersampling_grid_old(const Ray& r) const
     {
         Color avg;
         Ray temp_r;
@@ -176,7 +177,7 @@ namespace raytracer
                 Vector3f newStart(r.start.x + i, r.start.y + j, r.start.z);
                 temp_r = Ray(newStart, r.dir);
 
-                Color tmp = trace(temp_r, lvl);
+                Color tmp = trace(temp_r);
 
                 avg += tmp;
             }
@@ -185,7 +186,7 @@ namespace raytracer
         avg /= antialiasing*antialiasing;
         return avg;
     }
-    Color Scene::supersampling_grid(Ray &r, const glm::uint16 &lvl)
+    Color Scene::supersampling_grid(const Ray& r) const
     {
         Color avg = Color(0.0f, 0.0f, 0.0f);
         Ray temp_r;
@@ -213,7 +214,7 @@ namespace raytracer
                     temp_r = Ray(newStart, r.dir);
                 }
 
-                Color tmp = trace(temp_r, lvl);
+                Color tmp = trace(temp_r);
 
                 avg += tmp;
             }
@@ -223,7 +224,7 @@ namespace raytracer
         return avg;
     }
 
-    Ray Scene::generate_rays(const int &y, const int &x)
+    Ray Scene::generate_rays(const int& y, const int& x) const
     {
         Ray r;
         ProjectionInfo& projInfo = *projectionInfo;
@@ -232,20 +233,20 @@ namespace raytracer
                 projInfo.pixelHeight * projInfo.v * (glm::float32)y + projInfo.pixelWidth * projInfo.u * (glm::float32)x;
 
         if(!projInfo.isOrthogonal)
-            r = Ray(projInfo.orig, pixelCenter);
+            r = Ray(projInfo.orig, glm::normalize(pixelCenter));
         else
             r = Ray(pixelCenter, projInfo.w);
 
         return r;
     }
-    Ray Scene::generate_rays_old(const int &y, const int &x)
+    Ray Scene::generate_rays_old(const int& y, const int& x) const
     {
         Ray r(Vector3f((float)x, (float)y, -2000.0f), Vector3f(0.0f, 0.0f, 1.0f));
 
         return r;
     }
 
-    void Scene::render(const glm::uint16 &level)
+    void Scene::render()
     {
         debugString("Render started.");
         img.resize(width * height);
@@ -254,19 +255,21 @@ namespace raytracer
         {
             for(int x = 0; x < width; ++x)
             {
-                Ray r = generate_rays(y, x);
-                //img[y*width + x] = trace(r, level);
-                img[y*width + x] = supersampling_grid(r, level);
+                //Ray r = generate_rays(y, x);
+                //img[y*width + x] = trace(r);
+                //img[y*width + x] = supersampling_grid(r);
+
+                const Ray r = (this->*rays_func)(y, x);
+                img[y*width + x] = (this->*aa_func)(r);
             }
         }
 
-        savepng();
+        (this->*output_func)();
 
         img.clear();
-        debugString("Render ended.");
+        debugString(filename + " saved.");
     }
-
-    bool Scene::getClosestIntersection(const Ray& r, Intersection& closestIntersection)
+    bool Scene::getClosestIntersection(const Ray& r, Intersection& closestIntersection) const
     {
         intersectionList list;
 
@@ -286,5 +289,8 @@ namespace raytracer
 
         return true;
     }
+
+
+
 }
 
