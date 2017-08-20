@@ -11,7 +11,7 @@ int main()
     const glm::uint16 width = 800, height = 800, level = 15;
 
     Scene::ProjectionInfo proj_info(false);
-    Scene scene(width, height, level, 1, "scene_real", Scene::png, proj_info);
+    Scene scene(width, height, level, 2, "scene_real", Scene::png, proj_info);
 
     Texture earth_texture = generate_texture("textures/world.topo.bathy.200412.3x5400x2700.png");
     SphereTextureMap sphere_earth(earth_texture);

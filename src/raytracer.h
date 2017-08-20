@@ -214,7 +214,7 @@ namespace raytracer
             return (lightColor * intensity) / (4.0f * glm::pi<float>() * r2);
         }
         RealisticPointLight(const Vector3f &p, const Color &col, const glm::float32 &intens) : PointLight(p, col, intens), exp(2.0f){}
-        RealisticPointLight(const Vector3f &p, const Color &col, const glm::float32 &intens, glm::float32 &exponent) : PointLight(p, col, intens), exp(exponent){}
+        RealisticPointLight(const Vector3f &p, const Color &col, const glm::float32 &intens, const glm::float32 &exponent) : PointLight(p, col, intens), exp(exponent){}
     private:
         glm::float32 exp;
     };

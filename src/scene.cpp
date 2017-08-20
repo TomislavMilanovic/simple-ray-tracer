@@ -215,9 +215,9 @@ namespace raytracer
 
         float step = (1.0f/(float)antialiasing);
 
-        for(float i = -0.5f; i < 0.5f; i += step)
+        for(float i = -0.5f + step * 0.5f; i < 0.5f; i += step)
         {
-            for(float j = -0.5f; j < 0.5f; j += step)
+            for(float j = -0.5f + step * 0.5f; j < 0.5f; j += step)
             {
                 Vector3f newStart(r.start.x + i, r.start.y + j, r.start.z);
                 temp_r = Ray(newStart, r.dir);
