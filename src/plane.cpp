@@ -9,7 +9,7 @@ namespace raytracer
 
         if(denom > 1e-6f)
         {
-            Vector3f tmp = position - ray.start;
+            Vector3f tmp = centroid - ray.start;
             float t0 = glm::dot(tmp, normal) / denom;
 
             if((t0 > 0.0f))
@@ -18,8 +18,7 @@ namespace raytracer
 
                 intersection.distance = t0;
                 intersection.point = ray.start + t0 * ray.dir;
-                intersection.normal = glm::normalize(intersection.point - position);
-                //intersection.normal = -normal;
+                intersection.normal = -normal;
                 intersection.solid = this;
 
                 list.push_back(intersection);
@@ -34,10 +33,10 @@ namespace raytracer
 
     const Vector3f Plane::getMinPoint() const
     {
-        return Vector3f() * -INFINITY;
+        return centroid * -INFINITY;
     }
     const Vector3f Plane::getMaxPoint() const
     {
-        return Vector3f() * INFINITY;
+        return centroid * INFINITY;
     }
 }

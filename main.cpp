@@ -4,7 +4,6 @@
 #include <iostream>
 #include <ctime>
 
-
 int main()
 {
     using namespace raytracer;
@@ -12,7 +11,7 @@ int main()
     const glm::uint16 width = 800, height = 800, level = 15;
 
     Scene::ProjectionInfo proj_info(false);
-    Scene scene(width, height, level, 1, "scene2", Scene::png, proj_info);
+    Scene scene(width, height, level, 1, "scene_real", Scene::png, proj_info);
 
     Texture earth_texture = generate_texture("textures/world.topo.bathy.200412.3x5400x2700.png");
     SphereTextureMap sphere_earth(earth_texture);
@@ -173,29 +172,23 @@ int main()
 
 
     scene.objects.push_back(new AABB(objs));
-    //scene.addAreaLightUniform(0.05f);
+
     scene.lights.push_back(new PointLight(Vector3f(-0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
     scene.lights.push_back(new PointLight(Vector3f(0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
+
+    //scene.addAreaLightUniform(0.05f);
     //scene.addAreaLightRandom(2);
 
     //Old scene
 
     /*SolidObjects objs;
 
-    objs.push_back(new Sphere(Vector3f(440.0f, 300.0f, 0.0f), 40.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
-    objs.push_back(new Sphere(Vector3f(200.0f, 300.0f, 0.0f), 40.0f, Material(Color(1.0f, 0.0f, 0.0f), 0.0f)));
-    objs.push_back(new Sphere(Vector3f(360.0f, 300.0f, 0.0f), 40.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
+    objs.push_back(new Sphere(Vector3f(440.0f, 300.0f, 0.0f), 40.0f, Material(Color(0.0f, 1.0f, 1.0f), 5.0f)));
     objs.push_back(new Sphere(Vector3f(280.0f, 300.0f, 0.0f), 40.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
-
-    objs.push_back(new Sphere(Vector3f(440.0f, 500.0f, 0.0f), 40.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
-    objs.push_back(new Sphere(Vector3f(200.0f, 500.0f, 0.0f), 40.0f, Material(Color(1.0f, 0.0f, 0.0f), 0.0f)));
-    objs.push_back(new Sphere(Vector3f(360.0f, 500.0f, 0.0f), 40.0f, Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
+    objs.push_back(new Plane(Vector3f(350.0f, -450.0f, 975.0f), glm::normalize(Vector3f(0.0f, 1.0f, 1.0f)), Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
 
     scene.objects.push_back(new AABB(objs));
-
-    //scene.objects.push_back(new Plane(Vector3f(350.0f, -450.0f, 975.0f), glm::normalize(Vector3f(0.0f, 1.0f, 1.0f)), Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
-
-    scene.lights.push_back(new PointLight(Vector3f(350.0f, -375.0f, -1200.0f), Color(1.0f, 1.0f, 1.0f), 1.0f));*/
+    scene.lights.push_back(new RealisticPointLight(Vector3f(350.0f, 100.0f, -800.0f), Color(1.0f, 1.0f, 1.0f), 10000.0f, 1.0f));*/
 
     std::clock_t begin = clock();
     scene.render();

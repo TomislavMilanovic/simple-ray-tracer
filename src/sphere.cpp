@@ -8,7 +8,7 @@ namespace raytracer
         bool return_value = false;
 
         const float A = glm::dot(ray.dir, ray.dir);
-        const Vector3f dist = ray.start - position;
+        const Vector3f dist = ray.start - centroid;
         const float B = 2.0f * glm::dot(ray.dir, dist);
         const float C = glm::dot(dist, dist) - (custom_radius * custom_radius);
         const float discr = B * B - 4.0f * A * C;
@@ -29,7 +29,7 @@ namespace raytracer
 
                 intersection.distance = t;
                 intersection.point = ray.start + t * ray.dir;
-                intersection.normal = glm::normalize(intersection.point - position);
+                intersection.normal = glm::normalize(intersection.point - centroid);
                 intersection.solid = this;
 
                 intsc = intersection;
@@ -63,7 +63,7 @@ namespace raytracer
 
         while(1)
         {
-            Ray testRay(testPoint, glm::normalize(position - testPoint));
+            Ray testRay(testPoint, glm::normalize(centroid - testPoint));
 
             Intersection testIntersection;
 
@@ -82,7 +82,7 @@ namespace raytracer
 
                     intersection.distance = t;
                     intersection.point = displacedPoint;
-                    intersection.normal = glm::normalize(intersection.point - position);
+                    intersection.normal = glm::normalize(intersection.point - centroid);
                     intersection.solid = this;
 
                     list.push_back(intersection);
@@ -96,7 +96,7 @@ namespace raytracer
             testPoint = ray.start + t*ray.dir;
 
             //testirati da li je trenutna točka unutar "proširene" sfere
-            if(!isPointInSphere(testPoint, position, radius + max_disp_df * max_disp_du))
+            if(!isPointInSphere(testPoint, centroid, radius + max_disp_df * max_disp_du))
                 return false;
         }
     }
@@ -118,7 +118,7 @@ namespace raytracer
             t = testIntersection.distance;
             return disp_mapping_intersect(ray, list, t);
         }
-        else if(isPointInSphere(ray.start, position, radius + d_))
+        else if(isPointInSphere(ray.start, centroid, radius + d_))
         {
             return disp_mapping_intersect(ray, list, t);
         }
@@ -140,7 +140,7 @@ namespace raytracer
         const SphereTextureMap &text_map = *texture_map;
         Material currentMaterial = material;
 
-        Vector3f normal = glm::normalize(surfacePoint - position);
+        Vector3f normal = glm::normalize(surfacePoint - centroid);
         Color pointColor = text_map.getTextureMapping(normal);
 
         currentMaterial.setDiffuse(pointColor);
@@ -154,10 +154,29 @@ namespace raytracer
 
     const Vector3f Sphere::getMinPoint() const
     {
-        return position - radius;
+        if(displacement_map)
+        {
+            const float df = displacement_map->get_max_displacement();
+            const float du = displacement_map->get_du();
+
+            const float d_ = df*du;
+
+            return centroid - (radius + d_);
+        }
+        else
+            return centroid - radius;
     }
     const Vector3f Sphere::getMaxPoint() const
     {
-        return position + radius;
+        if(displacement_map)
+        {
+            const float df = displacement_map->get_max_displacement();
+            const float du = displacement_map->get_du();
+
+            const float d_ = df*du;
+
+            return centroid + (radius + d_);
+        }
+        return centroid + radius;
     }
 }

@@ -41,33 +41,6 @@ namespace raytracer
 
         return false;
     }
-    inline bool isPointInRectangle(const Vector3f &m, const Vector3f &a, const Vector3f &b, const Vector3f &d)
-    {
-        const float am_ab = glm::dot(a*m, a*b);
-        const float ab_ab = glm::dot(a*b, a*b);
-
-        const float am_ad = glm::dot(a*m, a*d);
-        const float ad_ad = glm::dot(a*d, a*d);
-
-        if((0.0f <= am_ab && am_ab <= ab_ab) && (0.0f <= am_ad && am_ad <= ad_ad))
-            return true;
-
-        return false;
-    }
-    inline bool isEqual(const glm::float32 &x, const glm::float32 &y)
-    {
-      const glm::float32 epsilon = 0.25f;
-      return glm::abs(x - y) <= epsilon * glm::abs(x);
-    }
-    inline bool isPointBetweenTwoPoints(const Vector3f &a, const Vector3f &b, const Vector3f &c)
-    {
-        if(isEqual(glm::length(c - a) + glm::length(b - c), glm::length(b - a)))
-        {
-            return true;
-        }
-
-        return false;
-    }
 
     inline void debugVec3f(const Vector3f &vec)
     {
@@ -117,7 +90,7 @@ namespace raytracer
         void setDiffuse(const Color diffuse) { _diffuse = diffuse; }
         void setReflection(const float reflection) { _reflection = reflection; }
 
-        Material(const Color &d, const float &refl) : _diffuse(d), _reflection(refl)  {}
+        Material(const Color &d, const float &refl) : _diffuse(glm::clamp(d, 0.0f, 1.0f)), _reflection(glm::clamp(refl, 0.0f, 1.0f))  {}
     private:
         Color _diffuse;
         float _reflection;
@@ -157,7 +130,7 @@ namespace raytracer
         void set_step(const float _step) {step = _step;}
         void set_epsilon(const float _eps) {epsilon = _eps;}
 
-        DisplacementMap(const Texture& d_map, const float& _du, const float& _stp, const float& _eps) : displacement_map(d_map), du(_du), step(_stp), epsilon(_eps), max_displacement(calculate_max_displacement()) {}
+        DisplacementMap(const Texture& d_map, const float& _du, const float& _stp, const float& _eps) : displacement_map(d_map), du(glm::abs(_du)), step(glm::abs(_stp)), epsilon(glm::abs(_eps)), max_displacement(calculate_max_displacement()) {}
     protected:
         Texture displacement_map;
         float du;
@@ -226,7 +199,7 @@ namespace raytracer
         {
             return lightColor * intensity;
         }
-        PointLight(const Vector3f &p, const Color &col, const glm::float32 &intens) : pos(p) , lightColor(col), intensity(intens){}
+        PointLight(const Vector3f &p, const Color &col, const glm::float32 &intens) : pos(p) , lightColor(glm::clamp(col, 0.0f, 1.0f)), intensity(glm::abs(intens)){}
     protected:
         Vector3f pos;
         Color lightColor;
@@ -237,23 +210,26 @@ namespace raytracer
     public:
         Color getIntensity(const Vector3f& surfacePoint) const
         {
-            const float r2 = glm::pow(glm::length(getDirection(surfacePoint)), 1.0f);
+            const float r2 = glm::pow(glm::length(getDirection(surfacePoint)), exp);
             return (lightColor * intensity) / (4.0f * glm::pi<float>() * r2);
         }
-        RealisticPointLight(const Vector3f &p, const Color &col, const glm::float32 &intens) : PointLight(p, col, intens){}
+        RealisticPointLight(const Vector3f &p, const Color &col, const glm::float32 &intens) : PointLight(p, col, intens), exp(2.0f){}
+        RealisticPointLight(const Vector3f &p, const Color &col, const glm::float32 &intens, glm::float32 &exponent) : PointLight(p, col, intens), exp(exponent){}
+    private:
+        glm::float32 exp;
     };
 
     class SolidObject
     {
     public:
-         SolidObject(const Vector3f &pos, const Material &mat) : position(pos), material(mat) {}
+         SolidObject(const Vector3f &pos, const Material &mat) : centroid(pos), material(mat) {}
          virtual bool intersect(const Ray &ray, intersectionList& list) const = 0;
          virtual Material surfaceMaterial(const Vector3f& /*surfacePoint*/) const { return material; }
 
          virtual const Vector3f getMinPoint() const = 0;
          virtual const Vector3f getMaxPoint() const = 0;
 
-         Vector3f position;
+         Vector3f centroid;
     protected:
          Material material;
     };
@@ -333,12 +309,12 @@ namespace raytracer
     public:
         Triangle(const Vector3f &_v0, const Vector3f &_v1, const Vector3f &_v2, const Material &_mat) : SolidObject(Vector3f(0.0f,0.0f,0.0f), _mat), v{_v0, _v1, _v2}
         {
-            position = (1.0f / 3.0f) * (v[0] + v[1] + v[2]);
+            centroid = (1.0f / 3.0f) * (v[0] + v[1] + v[2]);
 
             /*debugVec3f(v[0], "Triangle vertices1:");
             debugVec3f(v[1], "Triangle vertices2:");
             debugVec3f(v[2], "Triangle vertices3:");
-            debugVec3f(position, "Triangle centroid:");*/
+            debugVec3f(centroid, "Triangle centroid:");*/
         }
         bool intersect(const Ray &ray, intersectionList& list) const;
 
@@ -354,15 +330,8 @@ namespace raytracer
 
     public:
         AABB(const Vector3f &_min, const Vector3f &_max) : SolidObject(Vector3f(0.0f,0.0f,0.0f), Material(Color(), 0.0f)), bounds { _min, _max } {}
-        AABB(const SolidObjects& objects) : SolidObject(Vector3f(0.0f,0.0f,0.0f), Material(Color(), 0.0f))
+        AABB(const SolidObjects& objects) : SolidObject(Vector3f(), Material(Color(), 0.0f))
         {
-           // debug
-           for(unsigned int i = 0; i < objects.size(); ++i)
-           {
-               //debugVec3f(objects[i]->position);
-           }
-           //debugString("");
-
            if(objects.size() == 0)
                return;
            else if(objects.size() == 1)
@@ -393,11 +362,6 @@ namespace raytracer
 
            splitting_point = ComputeSpatialMedian(longest_axis, longest_axis_length);
 
-           /*debugVec3f(bounds[0], "Min:");
-           debugVec3f(bounds[1], "Max:");
-           debugFloat(longest_axis, "Longest axis:");
-           debugFloat(splitting_point, "Spl point:");*/
-
            SolidObjects subset_1;
            SolidObjects subset_2;
 
@@ -406,21 +370,21 @@ namespace raytracer
            {
                if(longest_axis == x)
                {
-                   if(objects[i]->position.x < splitting_point)
+                   if(objects[i]->centroid.x < splitting_point)
                        subset_1.push_back(objects[i]);
                    else
                        subset_2.push_back(objects[i]);
                }
                else if(longest_axis == y)
                {
-                   if(objects[i]->position.y < splitting_point)
+                   if(objects[i]->centroid.y < splitting_point)
                        subset_1.push_back(objects[i]);
                    else
                        subset_2.push_back(objects[i]);
                }
                else if(longest_axis == z)
                {
-                   if(objects[i]->position.z < splitting_point)
+                   if(objects[i]->centroid.z < splitting_point)
                        subset_1.push_back(objects[i]);
                    else
                        subset_2.push_back(objects[i]);
@@ -446,7 +410,6 @@ namespace raytracer
         const Vector3f getMinPoint() const;
         const Vector3f getMaxPoint() const;
 
-        int hits = 0;
     private:
         void ComputeBoundingBox(const SolidObjects& objects)
         {
@@ -486,13 +449,12 @@ namespace raytracer
             else
                 return bounds[0].z + longest_axis_length / 2.0f;
         }
-
         glm::float32 ComputeObjectMean(const Axis longest_axis, const SolidObjects& objects)
         {
             Vector3f avg_position;
             for(unsigned int i = 0; i < objects.size(); ++i)
             {
-                avg_position = avg_position + objects[i]->position;
+                avg_position = avg_position + objects[i]->centroid;
             }
             avg_position /= (float)objects.size();
 
@@ -507,10 +469,6 @@ namespace raytracer
         Vector3f bounds[2];
         SolidObject *left = NULL;
         SolidObject *right = NULL;
-        void inchits()
-        {
-            hits++;
-        }
     };
 }
 
