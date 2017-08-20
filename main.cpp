@@ -1,6 +1,7 @@
 #include "src/raytracer.h"
 #include "src/scene.h"
 #include "src/utils.h"
+#include "time.h"
 #include <iostream>
 #include <ctime>
 
@@ -11,7 +12,7 @@ int main()
     const glm::uint16 width = 800, height = 800, level = 15;
 
     Scene::ProjectionInfo proj_info(false);
-    Scene scene(width, height, level, 2, "scene_real", Scene::png, proj_info);
+    Scene scene(width, height, level, 1, "scene_real", Scene::png, proj_info);
 
     Texture earth_texture = generate_texture("textures/world.topo.bathy.200412.3x5400x2700.png");
     SphereTextureMap sphere_earth(earth_texture);
@@ -190,13 +191,17 @@ int main()
     scene.objects.push_back(new AABB(objs));
     scene.lights.push_back(new RealisticPointLight(Vector3f(350.0f, 100.0f, -800.0f), Color(1.0f, 1.0f, 1.0f), 10000.0f, 1.0f));*/
 
-    std::clock_t begin = clock();
+    struct timespec start, finish;
+    double elapsed;
+
+    clock_gettime(CLOCK_MONOTONIC, &start);
     scene.render();
-    std::clock_t end = clock();
+    clock_gettime(CLOCK_MONOTONIC, &finish);
 
-    double elapsed_secs = double(end-begin) / CLOCKS_PER_SEC;
+    elapsed = (finish.tv_sec - start.tv_sec);
+    elapsed += (finish.tv_nsec - start.tv_nsec) / 1e9; //1e9
 
-    std::cout << "Elapsed time: " << elapsed_secs << " s" << std::endl;
+    std::cout << "Elapsed time: " << elapsed << " s" << std::endl;
 
     return 0;
 }

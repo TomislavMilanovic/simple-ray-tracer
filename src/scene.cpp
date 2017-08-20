@@ -177,12 +177,12 @@ namespace raytracer
                 Vector3f dist = lights[i]->getDirection(closestIntersection.point);
                 if(glm::dot(closestIntersection.normal, dist) <= 0.0f) continue; //ako nikako nema svjetla
 
-                Ray lightRay(closestIntersection.point, glm::normalize(dist), true);
+                Ray shadowRay(closestIntersection.point, glm::normalize(dist), true);
 
                 bool inShadow = false;
                 Intersection lightClosestIntersection;
 
-                if((getClosestIntersection(lightRay, lightClosestIntersection)) &&
+                if((getClosestIntersection(shadowRay, lightClosestIntersection)) &&
                    !(lightClosestIntersection.solid == closestIntersection.solid) &&
                    !(lightClosestIntersection.distance > glm::length(dist)))
                     inShadow = true;
@@ -190,7 +190,7 @@ namespace raytracer
                 if(!inShadow)
                 {
                     const Color diffuse = currentMat.diffuse();
-                    const float lambert = glm::dot(lightRay.dir, closestIntersection.normal) * refl_coef;
+                    const float lambert = glm::dot(shadowRay.dir, closestIntersection.normal) * refl_coef;
                     const Color testLightIntensity = lights[i]->getIntensity(closestIntersection.point);
 
                     result += lambert * testLightIntensity * diffuse;
