@@ -307,14 +307,10 @@ namespace raytracer
     class Triangle : public SolidObject
     {
     public:
-        Triangle(const Vector3f &_v0, const Vector3f &_v1, const Vector3f &_v2, const Material &_mat) : SolidObject(Vector3f(0.0f,0.0f,0.0f), _mat), v{_v0, _v1, _v2}
+        Triangle(const Vector3f &_v0, const Vector3f &_v1, const Vector3f &_v2, const Material &_mat, const bool &_culling = false) :
+            SolidObject(Vector3f(0.0f,0.0f,0.0f), _mat), v{_v0, _v1, _v2}, culling(_culling)
         {
             centroid = (1.0f / 3.0f) * (v[0] + v[1] + v[2]);
-
-            /*debugVec3f(v[0], "Triangle vertices1:");
-            debugVec3f(v[1], "Triangle vertices2:");
-            debugVec3f(v[2], "Triangle vertices3:");
-            debugVec3f(centroid, "Triangle centroid:");*/
         }
         bool intersect(const Ray &ray, intersectionList& list) const;
 
@@ -322,6 +318,7 @@ namespace raytracer
         const Vector3f getMaxPoint() const;
     private:
         const Vector3f v[3];
+        bool culling = false;
     };
 
     class AABB : public SolidObject

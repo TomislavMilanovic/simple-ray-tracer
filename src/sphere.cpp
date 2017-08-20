@@ -7,11 +7,11 @@ namespace raytracer
     {
         bool return_value = false;
 
-        const float A = glm::dot(ray.dir, ray.dir);
+        //const float A = glm::dot(ray.dir, ray.dir);
         const Vector3f dist = ray.start - centroid;
         const float B = 2.0f * glm::dot(ray.dir, dist);
         const float C = glm::dot(dist, dist) - (custom_radius * custom_radius);
-        const float discr = B * B - 4.0f * A * C;
+        const float discr = B * B - 4.0f * C;
 
         if(discr < 0.0f)
             return_value = false;
