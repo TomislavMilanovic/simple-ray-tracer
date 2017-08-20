@@ -221,9 +221,7 @@ namespace raytracer
             {
                 Vector3f newStart(r.start.x + i, r.start.y + j, r.start.z);
                 temp_r = Ray(newStart, r.dir);
-
                 Color tmp = trace(temp_r);
-
                 avg += tmp;
             }
         }
@@ -233,13 +231,12 @@ namespace raytracer
     }
     Color Scene::supersampling_grid(const Ray& r) const
     {
-        Color avg = Color(0.0f, 0.0f, 0.0f);
+        Color avg;
         Ray temp_r;
         ProjectionInfo& projInfo = *projectionInfo;
 
         const float step_x = (projInfo.pixelWidth / (float)antialiasing);
         const float step_y = (projInfo.pixelHeight / (float)antialiasing);
-
         const float pw_half = projInfo.pixelWidth * 0.5f;
         const float ph_half = projInfo.pixelHeight * 0.5f;
 
@@ -258,13 +255,10 @@ namespace raytracer
                     Vector3f newStart = r.start + i * projInfo.u + j * projInfo.v;
                     temp_r = Ray(newStart, r.dir);
                 }
-
                 Color tmp = trace(temp_r);
-
                 avg += tmp;
             }
         }
-
         avg /= antialiasing * antialiasing;
         return avg;
     }
