@@ -307,7 +307,7 @@ namespace raytracer
     class Triangle : public SolidObject
     {
     public:
-        Triangle(const Vector3f &_v0, const Vector3f &_v1, const Vector3f &_v2, const Material &_mat, const bool &_culling = false) :
+        Triangle(const Vector3f &_v0, const Vector3f &_v1, const Vector3f &_v2, const Material &_mat, const bool &_culling = true) :
             SolidObject(Vector3f(0.0f,0.0f,0.0f), _mat), v{_v0, _v1, _v2}, culling(_culling)
         {
             centroid = (1.0f / 3.0f) * (v[0] + v[1] + v[2]);
@@ -329,6 +329,12 @@ namespace raytracer
         AABB(const Vector3f &_min, const Vector3f &_max) : SolidObject(Vector3f(0.0f,0.0f,0.0f), Material(Color(), 0.0f)), bounds { _min, _max } {}
         AABB(const SolidObjects& objects) : SolidObject(Vector3f(), Material(Color(), 0.0f))
         {
+           /*for(unsigned i = 0; i < objects.size(); ++i)
+           {
+               debugVec3f(objects[i]->centroid);
+           }
+           debugString("");*/
+
            if(objects.size() == 0)
                return;
            else if(objects.size() == 1)
@@ -394,6 +400,13 @@ namespace raytracer
                subset_2.clear();
 
                splitting_point = ComputeObjectMean(longest_axis, objects);
+
+               /*debugVec3f(bounds[0], "Min:");
+               debugVec3f(bounds[1], "Max:");
+
+               debugFloat(longest_axis, "Longest axis:");
+               debugFloat(longest_axis_length, "L axis length");
+               debugFloat(splitting_point, "Spl point");*/
 
                goto create_subsets;
            }

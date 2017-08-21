@@ -42,7 +42,7 @@ namespace raytracer
         const Vector3f c(0.5f, 1.0f + offsetY, wall_factor + 0.25f);
         const Vector3f d(-0.5f, 1.0f + offsetY, wall_factor + 0.25f);
 
-        int num = 0;
+        std::vector<Vector3f> points;
 
         for(float x = -0.5f; x < 0.5f; x += step)
         {
@@ -50,23 +50,17 @@ namespace raytracer
             {
                 for(float z = wall_factor + 0.25f; z < -1.25f; z += step)
                 {
-                    Vector3f point(x, y, z);
-                    //std::cout << x << " " << y << " " << z << std::endl;
-                    //if(isPointInRectangle(point, a, b, d))
-                    {
-                        //std::cout << x << " " << y << " " << z << std::endl;
-                        lights.push_back(new RealisticPointLight(point, Color(1.0f, 1.0f, 1.0f), 14.0f / 220.0f));
-                        num++;
-                    }
-                    /*else
-                    {
-                        std::cout << x << " " << y << " " << z << std::endl;
-                    }*/
+                    points.push_back(Vector3f(x, y, z));
                 }
             }
         }
 
-        std::cout << num << std::endl;
+        debugFloat(points.size(), "Number of point lights:");
+
+        for(unsigned i = 0; i < points.size(); ++i)
+        {
+            lights.push_back(new RealisticPointLight(points[i], Color(1.0f, 1.0f, 1.0f), 14.0f / points.size(), 1.0f));
+        }
     }
 
     const glm::uint16& Scene::get_antialiasing() const { return antialiasing; }
@@ -200,7 +194,7 @@ namespace raytracer
             refl_coef *= currentMat.reflection();
 
             //odbijena zraka
-            r = Ray(closestIntersection.point + closestIntersection.normal * 0.01f, glm::reflect(r.dir, closestIntersection.normal));
+            r = Ray(closestIntersection.point, glm::reflect(r.dir, closestIntersection.normal));
             lvl--;
 
         }while((refl_coef > 0.0f) && (lvl > 0));

@@ -5,22 +5,17 @@
 #include <iostream>
 #include <ctime>
 
-int main()
+using namespace raytracer;
+
+void CornellBoxScene_Normal(Scene& scene)
 {
-    using namespace raytracer;
+    const Texture earth_texture = generate_texture("textures/world.topo.bathy.200412.3x5400x2700.png");
+    const SphereTextureMap* sphere_earth = new SphereTextureMap(earth_texture);
 
-    const glm::uint16 width = 800, height = 800, level = 15;
+    Texture height_map = generate_texture("textures/maps/Heightmap.png");
+    SphereDisplacementMap* sphere_heightmap = new SphereDisplacementMap(height_map, 0.05f, 0.001f, 0.01f);
 
-    Scene::ProjectionInfo proj_info(false);
-    Scene scene(width, height, level, 1, "scene_real", Scene::png);
-
-    Texture earth_texture = generate_texture("textures/world.topo.bathy.200412.3x5400x2700.png");
-    SphereTextureMap sphere_earth(earth_texture);
-
-    Texture height_map = generate_texture("textures/Orange-bumpmap.png");
-    SphereDisplacementMap sphere_heightmap(height_map, 0.2f, 0.001f, 0.01f);
-
-    /*scene.objects.push_back(new Sphere(Vector3f(-0.3f, -0.75f, -1.5f), 0.3f, Material(Color(1.0f, 165.0f/255.0f, 0.0f), 0.0f), sphere_earth));
+    scene.objects.push_back(new Sphere(Vector3f(-0.2f, -0.70f, -1.65f), 0.3f, Material(Color(0.0f, 1.0, 1.0f), 0.5f), *sphere_heightmap));
 
     const float wall_factor = -2.0f;
     //left wall
@@ -94,11 +89,24 @@ int main()
                                     ));
 
     scene.lights.push_back(new PointLight(Vector3f(-0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
-    scene.lights.push_back(new PointLight(Vector3f(0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));*/
+    scene.lights.push_back(new PointLight(Vector3f(0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
 
-    /*SolidObjects objs;
+    //scene.addAreaLightUniform(0.08f);
+    //scene.addAreaLightRandom(2);
+}
 
-    objs.push_back(new Sphere(Vector3f(-0.3f, -0.75f, -1.5f), 0.3f, Material(Color(1.0f, 165.0f/255.0f, 0.0f), 0.0f), sphere_earth));
+
+void CornellBoxScene_AABB(Scene& scene)
+{
+    const Texture earth_texture = generate_texture("textures/world.topo.bathy.200412.3x5400x2700.png");
+    const SphereTextureMap* sphere_earth = new SphereTextureMap(earth_texture);
+
+    //Texture height_map = generate_texture("textures/Orange-bumpmap.png");
+    //SphereDisplacementMap sphere_heightmap(height_map, 0.2f, 0.001f, 0.01f);
+
+    SolidObjects objs;
+
+    objs.push_back(new Sphere(Vector3f(-0.2f, -0.65f, -1.4f), 0.3f, Material(Color(1.0f, 165.0f/255.0f, 0.0f), 0.0f), *sphere_earth));
 
     const float wall_factor = -2.0f;
     //left wall
@@ -170,18 +178,17 @@ int main()
                                     Vector3f(-1.0f, 1.0f, -1.0f),
                                     Material(Color(1.0f, 1.0f, 1.0f), 0.0f)
                                     ));
-
 
     scene.objects.push_back(new AABB(objs));
 
-    scene.lights.push_back(new PointLight(Vector3f(-0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
-    scene.lights.push_back(new PointLight(Vector3f(0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));*/
+    scene.lights.push_back(new PointLight(Vector3f(-0.7f, 1.0f - 0.1f, -1.3f), Color(1.0f, 1.0f, 1.0f), 0.5f));
+    scene.lights.push_back(new PointLight(Vector3f(0.7f, 1.0f - 0.1f, -1.3f), Color(1.0f, 1.0f, 1.0f), 0.5f));
 
-    //scene.addAreaLightUniform(0.05f);
+    //scene.addAreaLightUniform(0.08f);
     //scene.addAreaLightRandom(2);
-
-    //Old scene
-
+}
+void OldScene(Scene& scene)
+{
     SolidObjects objs;
 
     objs.push_back(new Sphere(Vector3f(440.0f, 300.0f, 0.0f), 40.0f, Material(Color(0.0f, 1.0f, 1.0f), 5.0f)));
@@ -199,10 +206,22 @@ int main()
                                 Material(Color(1.0f, 1.0f, 1.0f), 0.0f)
                                 ));
 
-    //scene.objects.push_back(new Plane(Vector3f(350.0f, -450.0f, 975.0f), glm::normalize(Vector3f(0.0f, 1.0f, 1.0f)), Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
+    scene.objects.push_back(new Plane(Vector3f(350.0f, -450.0f, 975.0f), glm::normalize(Vector3f(0.0f, 1.0f, 1.0f)), Material(Color(0.0f, 1.0f, 1.0f), 0.0f)));
 
     scene.objects.push_back(new AABB(objs));
     scene.lights.push_back(new RealisticPointLight(Vector3f(350.0f, 100.0f, -800.0f), Color(1.0f, 1.0f, 1.0f), 10000.0f, 1.0f));
+}
+
+int main()
+{
+    const glm::uint16 width = 400, height = 400, level = 15;
+
+    Scene::ProjectionInfo proj_info(false);
+    Scene scene(width, height, level, 3, "dispmapping_error_3_0.05f_0.001f_0.01f refl 0.5f", Scene::png, proj_info);
+
+    //CornellBoxScene_AABB(scene);
+    CornellBoxScene_Normal(scene);
+    //OldScene(scene);
 
     struct timespec start, finish;
     double elapsed;

@@ -61,6 +61,9 @@ namespace raytracer
         const float max_disp_df = disp_map.get_max_displacement();
         const float max_disp_du = disp_map.get_du();
 
+        //if(glm::length(centroid - ray.start) <= radius)
+            //return false;
+
         while(1)
         {
             Ray testRay(testPoint, glm::normalize(centroid - testPoint));
@@ -73,6 +76,7 @@ namespace raytracer
                 float d_ = disp_map.getDispMapping(testIntersection.normal);
 
                 Vector3f displacedPoint = testIntersection.point + (testIntersection.normal * d_);
+                if(t == start_t && glm::length(ray.start - displacedPoint) <= disp_map.get_epsilon()) return false;
 
                 t += disp_map.get_step();
 
@@ -118,10 +122,10 @@ namespace raytracer
             t = testIntersection.distance;
             return disp_mapping_intersect(ray, list, t);
         }
-        else if(isPointInSphere(ray.start, centroid, radius + d_))
+        /*else if(isPointInSphere(ray.start, centroid, radius + d_))
         {
             return disp_mapping_intersect(ray, list, t);
-        }
+        }*/
 
         return false;
     }
@@ -156,6 +160,7 @@ namespace raytracer
     {
         if(displacement_map)
         {
+            debugString("Ovo nikako ne smije biti pozvano!");
             const float df = displacement_map->get_max_displacement();
             const float du = displacement_map->get_du();
 

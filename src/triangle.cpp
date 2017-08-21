@@ -34,7 +34,7 @@ namespace raytracer
 
         intersection.distance = glm::dot(e2, q) * invDet;
         intersection.point = ray.start + intersection.distance*ray.dir;
-        intersection.normal = culling ? glm::normalize(glm::cross(e1, e2)) : glm::sign(det) * glm::normalize(glm::cross(e1, e2));
+        intersection.normal = glm::sign(det) * glm::normalize(glm::cross(e1, e2));
         intersection.solid = this;
 
         list.push_back(intersection);
