@@ -329,11 +329,13 @@ namespace raytracer
         AABB(const Vector3f &_min, const Vector3f &_max) : SolidObject(Vector3f(0.0f,0.0f,0.0f), Material(Color(), 0.0f)), bounds { _min, _max } {}
         AABB(const SolidObjects& objects) : SolidObject(Vector3f(), Material(Color(), 0.0f))
         {
-           /*for(unsigned i = 0; i < objects.size(); ++i)
+           /*
+           for(unsigned i = 0; i < objects.size(); ++i)
            {
                debugVec3f(objects[i]->centroid);
            }
-           debugString("");*/
+           debugString("");
+           */
 
            if(objects.size() == 0)
                return;
@@ -351,19 +353,11 @@ namespace raytracer
            }
 
            ComputeBoundingBox(objects);
-           Axis longest_axis;
-           Vector3f MaxMin = bounds[1] - bounds[0];
-           glm::float32 longest_axis_length = glm::max(glm::max(MaxMin.x, MaxMin.y), MaxMin.z);
+           Axis longest_axis = x;
            glm::float32 splitting_point = 0.0f;
+           bool first_pass = true;
 
-           if(MaxMin.x == longest_axis_length)
-               longest_axis = x;
-           else if(MaxMin.y == longest_axis_length)
-               longest_axis = y;
-           else if(MaxMin.z == longest_axis_length)
-               longest_axis = z;
-
-           splitting_point = ComputeSpatialMedian(longest_axis, longest_axis_length);
+           splitting_point = ComputeSpatialMedian(longest_axis);
 
            SolidObjects subset_1;
            SolidObjects subset_2;
@@ -396,18 +390,16 @@ namespace raytracer
 
            if(subset_1.empty() || subset_2.empty())
            {
+               if(!first_pass)
+               {
+                   debugString("Unable to build AABB tree from all input objects. Maybe three or more objects have the same centroid?");
+                   return;
+               }
                subset_1.clear();
                subset_2.clear();
 
                splitting_point = ComputeObjectMean(longest_axis, objects);
-
-               /*debugVec3f(bounds[0], "Min:");
-               debugVec3f(bounds[1], "Max:");
-
-               debugFloat(longest_axis, "Longest axis:");
-               debugFloat(longest_axis_length, "L axis length");
-               debugFloat(splitting_point, "Spl point");*/
-
+               first_pass = false;
                goto create_subsets;
            }
 
@@ -450,8 +442,18 @@ namespace raytracer
             bounds[0] = min;
             bounds[1] = max;
         }
-        glm::float32 ComputeSpatialMedian(const Axis longest_axis, const glm::float32 longest_axis_length)
+        glm::float32 ComputeSpatialMedian(Axis& longest_axis)
         {
+            Vector3f MaxMin = bounds[1] - bounds[0];
+            glm::float32 longest_axis_length = glm::max(glm::max(MaxMin.x, MaxMin.y), MaxMin.z);
+
+            if(MaxMin.x == longest_axis_length)
+                longest_axis = x;
+            else if(MaxMin.y == longest_axis_length)
+                longest_axis = y;
+            else if(MaxMin.z == longest_axis_length)
+                longest_axis = z;
+
             if(longest_axis == x)
                 return bounds[0].x + longest_axis_length / 2.0f;
             else if(longest_axis == y)
@@ -459,21 +461,54 @@ namespace raytracer
             else
                 return bounds[0].z + longest_axis_length / 2.0f;
         }
-        glm::float32 ComputeObjectMean(const Axis longest_axis, const SolidObjects& objects)
+        glm::float32 ComputeObjectMean(Axis& longest_axis, const SolidObjects& objects)
         {
-            Vector3f avg_position;
+            Vector3f min = objects[0]->centroid;
+            Vector3f max = objects[0]->centroid;
+
+            Vector3f avg_centroid;
+
             for(unsigned int i = 0; i < objects.size(); ++i)
             {
-                avg_position = avg_position + objects[i]->centroid;
+                avg_centroid = avg_centroid + objects[i]->centroid;
+
+                if(objects[i]->centroid.x < min.x)
+                    min.x = objects[i]->centroid.x;
+
+                if(objects[i]->centroid.y < min.y)
+                    min.y = objects[i]->centroid.y;
+
+                if(objects[i]->centroid.z < min.z)
+                    min.z = objects[i]->centroid.z;
+
+                if(objects[i]->centroid.x > max.x)
+                    max.x = objects[i]->centroid.x;
+
+                if(objects[i]->centroid.y > max.y)
+                    max.y = objects[i]->centroid.y;
+
+                if(objects[i]->centroid.z > max.z)
+                    max.z = objects[i]->centroid.z;
+
             }
-            avg_position /= (float)objects.size();
+            avg_centroid /= (float)objects.size();
+
+            Vector3f MaxMin = max - min;
+            glm::float32 longest_axis_length = glm::max(glm::max(MaxMin.x, MaxMin.y), MaxMin.z);
+
+            if(MaxMin.x == longest_axis_length)
+                longest_axis = x;
+            else if(MaxMin.y == longest_axis_length)
+                longest_axis = y;
+            else if(MaxMin.z == longest_axis_length)
+                longest_axis = z;
 
             if(longest_axis == x)
-                return avg_position.x;
+                return avg_centroid.x;
             else if(longest_axis == y)
-                return avg_position.y;
+                return avg_centroid.y;
             else
-                return avg_position.z;
+                return avg_centroid.z;
         }
 
         Vector3f bounds[2];

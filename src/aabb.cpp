@@ -8,7 +8,7 @@ namespace raytracer
         //if(ray.isLightRay)
             //return false;
 
-        if(right == NULL)
+        if(right == NULL && left)
             return left->intersect(ray, list);
 
         glm::float32 t, t_min, t_max, t_min_y, t_max_y, t_min_z, t_max_z;
