@@ -68,10 +68,10 @@ namespace raytracer
     public:
         Ray() : start(Vector3f()), dir(Vector3f()) { calc_cache(); }
         Ray(const Vector3f &st, const Vector3f &d) : start(st), dir(d) { calc_cache(); }
-        Ray(const Vector3f &st, const Vector3f &d, const bool is_light) : start(st), dir(d), isLightRay(is_light) { calc_cache(); }
+        Ray(const Vector3f &st, const Vector3f &d, const bool is_shadow) : start(st), dir(d), isShadowRay(is_shadow) { calc_cache(); }
         Vector3f start, dir, inv_dir;
         int sign[3];
-        bool isLightRay = false;
+        bool isShadowRay = false;
     private:
         void calc_cache()
         {

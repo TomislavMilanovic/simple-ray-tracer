@@ -160,7 +160,6 @@ namespace raytracer
     {
         if(displacement_map)
         {
-            debugString("Ovo nikako ne smije biti pozvano!");
             const float df = displacement_map->get_max_displacement();
             const float du = displacement_map->get_du();
 

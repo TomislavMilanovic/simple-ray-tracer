@@ -9,58 +9,22 @@
 
 namespace raytracer
 {  
-    void Scene::addAreaLightRandom(const int &lightNum)
-    {
-        //area light prototype
-        const float wall_factor = -2.0f;
-        const float offsetY = -0.01f;
-        const Vector3f a(-0.5f, 1.0f + offsetY, -1.25f);
-        const Vector3f b(0.5f, 1.0f + offsetY, -1.25f);
-        const Vector3f c(0.5f, 1.0f + offsetY, wall_factor + 0.25f);
-        const Vector3f d(-0.5f, 1.0f + offsetY, wall_factor + 0.25f);
-
-        std::random_device rd;
-        std::mt19937 e2(rd());
-
-        std::uniform_real_distribution<> x_dist(-0.5f, 0.5f);
-        std::uniform_real_distribution<> y_dist(1.0f + offsetY, 1.0f + offsetY);
-        std::uniform_real_distribution<> z_dist(wall_factor + 0.25f, -1.25f);
-
-        for(int i = 0; i < lightNum; i++)
-        {
-            Vector3f point(x_dist(e2), y_dist(e2), z_dist(e2));
-            lights.push_back(new RealisticPointLight(point, Color(1.0f, 1.0f, 1.0f), 14.0f / (float)lightNum));
-        }
-    }
     void Scene::addAreaLightUniform(const float &step)
     {
         //area light prototype
         const float wall_factor = -2.0f;
         const float offsetY = -0.01f;
-        const Vector3f a(-0.5f, 1.0f + offsetY, -1.25f);
-        const Vector3f b(0.5f, 1.0f + offsetY, -1.25f);
-        const Vector3f c(0.5f, 1.0f + offsetY, wall_factor + 0.25f);
-        const Vector3f d(-0.5f, 1.0f + offsetY, wall_factor + 0.25f);
-
         std::vector<Vector3f> points;
 
         for(float x = -0.5f; x < 0.5f; x += step)
-        {
             for(float y = 1.0f + offsetY; y <= 1.0f + offsetY; y += step)
-            {
                 for(float z = wall_factor + 0.25f; z < -1.25f; z += step)
-                {
                     points.push_back(Vector3f(x, y, z));
-                }
-            }
-        }
 
         debugFloat(points.size(), "Number of point lights:");
 
         for(unsigned i = 0; i < points.size(); ++i)
-        {
             lights.push_back(new RealisticPointLight(points[i], Color(1.0f, 1.0f, 1.0f), 14.0f / points.size(), 1.0f));
-        }
     }
 
     const glm::uint16& Scene::get_antialiasing() const { return antialiasing; }
