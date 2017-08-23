@@ -100,12 +100,12 @@ void CornellBoxScene_AABB(Scene& scene)
     const Texture earth_texture = generate_texture("textures/world.topo.bathy.200412.3x5400x2700.png");
     const SphereTextureMap* sphere_earth = new SphereTextureMap(earth_texture);
 
-    //Texture height_map = generate_texture("textures/maps/Heightmap.png");
-    //SphereDisplacementMap* sphere_heightmap = new SphereDisplacementMap(height_map, 0.05f, 0.001f, 0.01f);
+    Texture height_map = generate_texture("textures/maps/Heightmap.png");
+    SphereDisplacementMap* sphere_heightmap = new SphereDisplacementMap(height_map, 0.05f, 0.001f, 0.01f);
 
     SolidObjects objs;
 
-    objs.push_back(new Sphere(Vector3f(0.0f, -0.65f, -1.55f), 0.3f, Material(Color(255.0f/255.0f, 0.0f, 127.0f/255.0f), 0.3f)));
+    objs.push_back(new Sphere(Vector3f(0.0f, -0.65f, -1.55f), 0.3f, Material(Color(0.0f, 1.0f, 1.0f), 0.5f)));
 
     const float wall_factor = -2.0f;
     //left wall
@@ -180,10 +180,10 @@ void CornellBoxScene_AABB(Scene& scene)
 
     scene.objects.push_back(new AABB(objs));
 
-    //scene.lights.push_back(new PointLight(Vector3f(-0.7f, 1.0f - 0.1f, -1.3f), Color(1.0f, 1.0f, 1.0f), 0.5f));
-    //scene.lights.push_back(new PointLight(Vector3f(0.7f, 1.0f - 0.1f, -1.3f), Color(1.0f, 1.0f, 1.0f), 0.5f));
+    scene.lights.push_back(new PointLight(Vector3f(-0.7f, 1.0f - 0.1f, -1.3f), Color(1.0f, 1.0f, 1.0f), 0.5f));
+    scene.lights.push_back(new PointLight(Vector3f(0.7f, 1.0f - 0.1f, -1.3f), Color(1.0f, 1.0f, 1.0f), 0.5f));
 
-    scene.addAreaLightUniform(0.085f);
+    //scene.addAreaLightUniform(0.085f);
     //scene.addAreaLightRandom(2);
 }
 void CornellBoxScene_WithoutAABB(Scene& scene)
@@ -300,10 +300,10 @@ void OldScene(Scene& scene)
 
 int main()
 {
-    const glm::uint16 width = 400, height = 400, level = 15;
+    const glm::uint16 width = 700, height = 700, level = 15;
 
     Scene::ProjectionInfo proj_info(false);
-    Scene scene(width, height, level, 2, "soft_shadows_aa_2_lights_72_time_", Scene::png, proj_info);
+    Scene scene(width, height, level, 1, "culling_test_false", Scene::png, proj_info);
 
     CornellBoxScene_AABB(scene);
     //CornellBoxScene_WithoutAABB(scene);

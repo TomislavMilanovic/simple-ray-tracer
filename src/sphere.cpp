@@ -122,10 +122,10 @@ namespace raytracer
             t = testIntersection.distance;
             return disp_mapping_intersect(ray, list, t);
         }
-        /*else if(isPointInSphere(ray.start, centroid, radius + d_))
+        else if(isPointInSphere(ray.start, centroid, radius + d_))
         {
             return disp_mapping_intersect(ray, list, t);
-        }*/
+        }
 
         return false;
     }

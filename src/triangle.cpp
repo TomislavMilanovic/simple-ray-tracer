@@ -5,7 +5,7 @@ namespace raytracer
 {
     bool Triangle::intersect(const Ray &ray, intersectionList &list) const
     {
-        const float eps = 0.1f;
+        const float eps = 1e-5f;
         const Vector3f e1 = v[1] - v[0];
         const Vector3f e2 = v[2] - v[0];
         const Vector3f p = glm::cross(ray.dir, e2);
@@ -17,7 +17,7 @@ namespace raytracer
         }
         else
         {
-            if(fabs(det) < eps) return false;
+            if(glm::abs(det) < eps) return false;
         }
 
         const float invDet = 1.0f / det;
@@ -27,13 +27,17 @@ namespace raytracer
         if(u < 0.0f || u > 1.0f) return false;
 
         const Vector3f q = glm::cross(s, e1);
+        const float t = glm::dot(e2, q) * invDet;
+
+        if(t <= eps) return false;
+
         const float v = glm::dot(ray.dir, q) * invDet;
         if(v < 0.0f || u + v > 1.0f) return false;
 
         Intersection intersection;
 
-        intersection.distance = glm::dot(e2, q) * invDet;
-        intersection.point = ray.start + intersection.distance*ray.dir;
+        intersection.distance = t;
+        intersection.point = ray.start + t*ray.dir;
         intersection.normal = glm::sign(det) * glm::normalize(glm::cross(e1, e2));
         intersection.solid = this;
 

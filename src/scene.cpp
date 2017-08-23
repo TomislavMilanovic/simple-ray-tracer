@@ -158,7 +158,8 @@ namespace raytracer
             refl_coef *= currentMat.reflection();
 
             //odbijena zraka
-            r = Ray(closestIntersection.point, glm::reflect(r.dir, closestIntersection.normal));
+            const Vector3f reflectDir = glm::reflect(r.dir, closestIntersection.normal);
+            r = Ray(closestIntersection.point + 1e-5f * reflectDir, reflectDir);
             lvl--;
 
         }while((refl_coef > 0.0f) && (lvl > 0));
