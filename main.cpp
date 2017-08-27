@@ -105,7 +105,7 @@ void CornellBoxScene_AABB(Scene& scene)
 
     SolidObjects objs;
 
-    objs.push_back(new Sphere(Vector3f(0.0f, -0.65f, -1.55f), 0.3f, Material(Color(0.0f, 1.0f, 1.0f), 0.5f)));
+    objs.push_back(new Sphere(Vector3f(0.0f, -0.65f, -1.55f), 0.3f, Material(Color(0.0f, 1.0f, 1.0f), 0.5f), *sphere_heightmap));
 
     const float wall_factor = -2.0f;
     //left wall

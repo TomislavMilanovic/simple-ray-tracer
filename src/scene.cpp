@@ -122,6 +122,8 @@ namespace raytracer
         float refl_coef = 1.0f;
         glm::uint16 lvl = level;
 
+        const float eps = 1e-5f;
+
         do
         {
             Intersection closestIntersection;
@@ -132,16 +134,16 @@ namespace raytracer
 
             for(glm::uint16 i = 0; i < lights.size(); ++i)
             {
-                Vector3f dist = lights[i]->getDirection(closestIntersection.point);
+                const Vector3f dist = lights[i]->getDirection(closestIntersection.point);
                 if(glm::dot(closestIntersection.normal, dist) <= 0.0f) continue; //ako nikako nema svjetla
 
-                Ray shadowRay(closestIntersection.point, glm::normalize(dist), true);
+                const Vector3f norm_dist = glm::normalize(dist);
+                Ray shadowRay(closestIntersection.point + norm_dist * eps, norm_dist, true);
 
                 bool inShadow = false;
                 Intersection lightClosestIntersection;
 
                 if((getClosestIntersection(shadowRay, lightClosestIntersection)) &&
-                   !(lightClosestIntersection.solid == closestIntersection.solid) &&
                    !(lightClosestIntersection.distance > glm::length(dist)))
                     inShadow = true;
 
