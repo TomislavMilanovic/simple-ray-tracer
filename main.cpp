@@ -89,10 +89,10 @@ void CornellBoxScene_Normal(Scene& scene)
                                     Material(Color(1.0f, 1.0f, 1.0f), 0.0f)
                                     ));
 
-    scene.lights.push_back(new PointLight(Vector3f(-0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
-    scene.lights.push_back(new PointLight(Vector3f(0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
+    //scene.lights.push_back(new PointLight(Vector3f(-0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
+    //scene.lights.push_back(new PointLight(Vector3f(0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
 
-    //scene.addAreaLightUniform(0.085f);
+    scene.addAreaLightUniform(0.1f);
     //scene.addAreaLightRandom(2);
 }
 void CornellBoxScene_AABB(Scene& scene)
@@ -298,17 +298,194 @@ void OldScene(Scene& scene)
     scene.lights.push_back(new RealisticPointLight(Vector3f(210.0f, 50.0f, -800.0f), Color(1.0f, 1.0f, 1.0f), 10000.0f, 1.0f));
 }
 
+void BVHScene_WithoutAABB(Scene& scene)
+{
+    scene.objects.push_back(new Sphere(Vector3f(-0.5f, -0.70f, -1.35f), 0.3f, Material(Color(0.0f, 1.0f, 1.0f), 0.5f)));
+    scene.objects.push_back(new Sphere(Vector3f(0.5f, -0.70f, -1.65f), 0.3f, Material(Color(0.0f, 1.0f, 0.0f), 0.0f)));
+    scene.objects.push_back(new Sphere(Vector3f(0.0f, -0.85f, -1.65f), 0.15f, Material(Color(0.0f, 1.0f, 0.5f), 0.2f)));
+    scene.objects.push_back(new Sphere(Vector3f(-0.5f, -0.10f, -1.35f), 0.3f, Material(Color(1.0f, 1.0f, 0.2f), 0.1f)));
+    scene.objects.push_back(new Sphere(Vector3f(-0.5f, 0.50f, -1.35f), 0.3f, Material(Color(1.0f, 192.0f/255.0f, 203.0f/255.0f), 0.7f)));
+
+    const float wall_factor = -2.0f;
+    //left wall
+    scene.objects.push_back(new Triangle(
+                                    Vector3f(-1.0f, 1.0f, wall_factor),
+                                    Vector3f(-1.0f, -1.0f, -1.0f),
+                                    Vector3f(-1.0f, -1.0f, wall_factor),
+                                    Material(Color(1.0f, 0.0f, 0.0f), 1.0f)
+                                    ));
+    scene.objects.push_back(new Triangle(
+                                    Vector3f(-1.0f, 1.0f, wall_factor),
+                                    Vector3f(-1.0f, 1.0f, -1.0f),
+                                    Vector3f(-1.0f, -1.0f, -1.0f),
+                                    Material(Color(1.0f, 0.0f, 0.0f), 1.0f)
+                                    ));
+
+    //right wall
+    scene.objects.push_back(new Triangle(
+                                    Vector3f(1.0f, 1.0f, wall_factor),
+                                    Vector3f(1.0f, -1.0f, wall_factor),
+                                    Vector3f(1.0f, -1.0f, -1.0f),
+                                    Material(Color(0.0f, 1.0f, 0.0f), 0.3f)
+                                    ));
+    scene.objects.push_back(new Triangle(
+                                    Vector3f(1.0f, 1.0f, wall_factor),
+                                    Vector3f(1.0f, -1.0f, -1.0f),
+                                    Vector3f(1.0f, 1.0f, -1.0f),
+                                    Material(Color(0.0f, 1.0f, 0.0f), 0.3f)
+                                    ));
+
+    //floor
+    scene.objects.push_back(new Triangle(
+                                    Vector3f(1.0f, -1.0f, wall_factor),
+                                    Vector3f(-1.0f, -1.0f, wall_factor),
+                                    Vector3f(-1.0f, -1.0f, -1.0f),
+                                    Material(Color(1.0f, 1.0f, 1.0f), 0.0f)
+                                    ));
+    scene.objects.push_back(new Triangle(
+                                    Vector3f(1.0f, -1.0f, wall_factor),
+                                    Vector3f(-1.0f, -1.0f, -1.0f),
+                                    Vector3f(1.0f, -1.0f, -1.0f),
+                                    Material(Color(1.0f, 1.0f, 1.0f), 0.0f)
+                                    ));
+
+    //back wall
+    scene.objects.push_back(new Triangle(
+                                    Vector3f(1.0f, 1.0f, wall_factor),
+                                    Vector3f(-1.0f, -1.0f, wall_factor),
+                                    Vector3f(1.0f, -1.0f, wall_factor),
+                                    Material(Color(1.0f, 1.0f, 1.0f), 0.0f)
+                                    ));
+    scene.objects.push_back(new Triangle(
+                                    Vector3f(1.0f, 1.0f, wall_factor),
+                                    Vector3f(-1.0f, 1.0f, wall_factor),
+                                    Vector3f(-1.0f, -1.0f, wall_factor),
+                                    Material(Color(1.0f, 1.0f, 1.0f), 0.0f)
+                                    ));
+
+    //ceiling
+    scene.objects.push_back(new Triangle(
+                                    Vector3f(-1.0f, 1.0f, -1.0f),
+                                    Vector3f(-1.0f, 1.0f, wall_factor),
+                                    Vector3f(1.0f, 1.0f, wall_factor),
+                                    Material(Color(1.0f, 1.0f, 1.0f), 0.0f)
+                                    ));
+    scene.objects.push_back(new Triangle(
+                                    Vector3f(1.0f, 1.0f, wall_factor),
+                                    Vector3f(1.0f, 1.0f, -1.0f),
+                                    Vector3f(-1.0f, 1.0f, -1.0f),
+                                    Material(Color(1.0f, 1.0f, 1.0f), 0.0f)
+                                    ));
+
+    //scene.lights.push_back(new PointLight(Vector3f(-0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
+    //scene.lights.push_back(new PointLight(Vector3f(0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
+
+    scene.addAreaLightUniform(0.08f);
+}
+
+void BVHScene_WithAABB(Scene& scene)
+{
+    SolidObjects objs;
+
+    objs.push_back(new Sphere(Vector3f(-0.5f, -0.70f, -1.35f), 0.3f, Material(Color(0.0f, 1.0f, 1.0f), 0.5f)));
+    objs.push_back(new Sphere(Vector3f(0.5f, -0.70f, -1.65f), 0.3f, Material(Color(0.0f, 1.0f, 0.0f), 0.0f)));
+    objs.push_back(new Sphere(Vector3f(0.0f, -0.85f, -1.65f), 0.15f, Material(Color(0.0f, 1.0f, 0.5f), 0.2f)));
+    objs.push_back(new Sphere(Vector3f(-0.5f, -0.10f, -1.35f), 0.3f, Material(Color(1.0f, 1.0f, 0.2f), 0.1f)));
+    objs.push_back(new Sphere(Vector3f(-0.5f, 0.50f, -1.35f), 0.3f, Material(Color(1.0f, 192.0f/255.0f, 203.0f/255.0f), 0.7f)));
+
+    const float wall_factor = -2.0f;
+    //left wall
+    objs.push_back(new Triangle(
+                                    Vector3f(-1.0f, 1.0f, wall_factor),
+                                    Vector3f(-1.0f, -1.0f, -1.0f),
+                                    Vector3f(-1.0f, -1.0f, wall_factor),
+                                    Material(Color(1.0f, 0.0f, 0.0f), 1.0f)
+                                    ));
+    objs.push_back(new Triangle(
+                                    Vector3f(-1.0f, 1.0f, wall_factor),
+                                    Vector3f(-1.0f, 1.0f, -1.0f),
+                                    Vector3f(-1.0f, -1.0f, -1.0f),
+                                    Material(Color(1.0f, 0.0f, 0.0f), 1.0f)
+                                    ));
+
+    //right wall
+    objs.push_back(new Triangle(
+                                    Vector3f(1.0f, 1.0f, wall_factor),
+                                    Vector3f(1.0f, -1.0f, wall_factor),
+                                    Vector3f(1.0f, -1.0f, -1.0f),
+                                    Material(Color(0.0f, 1.0f, 0.0f), 0.3f)
+                                    ));
+    objs.push_back(new Triangle(
+                                    Vector3f(1.0f, 1.0f, wall_factor),
+                                    Vector3f(1.0f, -1.0f, -1.0f),
+                                    Vector3f(1.0f, 1.0f, -1.0f),
+                                    Material(Color(0.0f, 1.0f, 0.0f), 0.3f)
+                                    ));
+
+    //floor
+    objs.push_back(new Triangle(
+                                    Vector3f(1.0f, -1.0f, wall_factor),
+                                    Vector3f(-1.0f, -1.0f, wall_factor),
+                                    Vector3f(-1.0f, -1.0f, -1.0f),
+                                    Material(Color(1.0f, 1.0f, 1.0f), 0.0f)
+                                    ));
+    objs.push_back(new Triangle(
+                                    Vector3f(1.0f, -1.0f, wall_factor),
+                                    Vector3f(-1.0f, -1.0f, -1.0f),
+                                    Vector3f(1.0f, -1.0f, -1.0f),
+                                    Material(Color(1.0f, 1.0f, 1.0f), 0.0f)
+                                    ));
+
+    //back wall
+    objs.push_back(new Triangle(
+                                    Vector3f(1.0f, 1.0f, wall_factor),
+                                    Vector3f(-1.0f, -1.0f, wall_factor),
+                                    Vector3f(1.0f, -1.0f, wall_factor),
+                                    Material(Color(1.0f, 1.0f, 1.0f), 0.0f)
+                                    ));
+    objs.push_back(new Triangle(
+                                    Vector3f(1.0f, 1.0f, wall_factor),
+                                    Vector3f(-1.0f, 1.0f, wall_factor),
+                                    Vector3f(-1.0f, -1.0f, wall_factor),
+                                    Material(Color(1.0f, 1.0f, 1.0f), 0.0f)
+                                    ));
+
+    //ceiling
+    objs.push_back(new Triangle(
+                                    Vector3f(-1.0f, 1.0f, -1.0f),
+                                    Vector3f(-1.0f, 1.0f, wall_factor),
+                                    Vector3f(1.0f, 1.0f, wall_factor),
+                                    Material(Color(1.0f, 1.0f, 1.0f), 0.0f)
+                                    ));
+    objs.push_back(new Triangle(
+                                    Vector3f(1.0f, 1.0f, wall_factor),
+                                    Vector3f(1.0f, 1.0f, -1.0f),
+                                    Vector3f(-1.0f, 1.0f, -1.0f),
+                                    Material(Color(1.0f, 1.0f, 1.0f), 0.0f)
+                                    ));
+
+    //scene.lights.push_back(new PointLight(Vector3f(-0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
+    //scene.lights.push_back(new PointLight(Vector3f(0.7f, 1.0f - 0.1f, -1.5f), Color(1.0f, 1.0f, 1.0f), 0.5f));
+
+    scene.objects.push_back(new AABB(objs));
+
+    scene.addAreaLightUniform(0.08f);
+}
+
 int main()
 {
-    const glm::uint16 width = 700, height = 700, level = 15;
+    const glm::uint16 width = 400, height = 400, level = 15;
 
     Scene::ProjectionInfo proj_info(false);
-    Scene scene(width, height, level, 1, "culling_test_false", Scene::png, proj_info);
+    Scene scene(width, height, level, 2, "BVHScene_WithAABB2", Scene::png, proj_info);
 
-    CornellBoxScene_AABB(scene);
+    //CornellBoxScene_AABB(scene);
     //CornellBoxScene_WithoutAABB(scene);
     //CornellBoxScene_Normal(scene);
     //OldScene(scene);
+
+    //BVHScene_WithoutAABB(scene);
+    BVHScene_WithAABB(scene);
 
     struct timespec start, finish;
     double elapsed;
