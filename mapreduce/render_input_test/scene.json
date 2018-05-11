@@ -1,0 +1,154 @@
+{
+  "settings": {
+    "width": 400,
+    "height": 400,
+    "level": 15,
+    "antialiasing": 2
+  },
+  "objects": [
+    {
+      "type": "Sphere",
+      "position": {"x": 0, "y": -0.65, "z": -1.55},
+      "radius": 0.3,
+      "material": {
+        "color": {"r": 0, "g": 1, "b": 1},
+        "reflectivity": 0.5
+      },
+      "texture": "textures/world.topo.bathy.200412.3x5400x2700.png"
+    },
+    {
+      "type": "Triangle",
+      "position": [
+        {"x": -1, "y": 1, "z": -2},
+        {"x": -1, "y": -1, "z": -1},
+        {"x": -1, "y": -1, "z": -2}
+      ],
+      "material": {
+        "color": {"r": 1, "g": 0, "b": 0},
+        "reflectivity": 1
+      }
+    },
+    {
+      "type": "Triangle",
+      "position": [
+        {"x": -1, "y": 1, "z": -2},
+        {"x": -1, "y": 1, "z": -1},
+        {"x": -1, "y": -1, "z": -1}
+      ],
+      "material": {
+        "color": {"r": 1, "g": 0, "b": 0},
+        "reflectivity": 1
+      }
+    },
+    {
+      "type": "Triangle",
+      "position": [
+        {"x": 1, "y": 1, "z": -2},
+        {"x": 1, "y": -1, "z": -2},
+        {"x": 1, "y": -1, "z": -1}
+      ],
+      "material": {
+        "color": {"r": 0, "g": 1, "b": 0},
+        "reflectivity": 0.3
+      }
+    },
+    {
+      "type": "Triangle",
+      "position": [
+        {"x": 1, "y": 1, "z": -2},
+        {"x": 1, "y": -1, "z": -1},
+        {"x": 1, "y": 1, "z": -1}
+      ],
+      "material": {
+        "color": {"r": 0, "g": 1, "b": 0},
+        "reflectivity": 0.3
+      }
+    },
+    {
+      "type": "Triangle",
+      "position": [
+        {"x": 1, "y": -1, "z": -2},
+        {"x": -1, "y": -1, "z": -2},
+        {"x": -1, "y": -1, "z": -1}
+      ],
+      "material": {
+        "color": {"r": 1, "g": 1, "b": 1},
+        "reflectivity": 0
+      }
+    },
+    {
+      "type": "Triangle",
+      "position": [
+        {"x": 1, "y": -1, "z": -2},
+        {"x": -1, "y": -1, "z": -1},
+        {"x": 1, "y": -1, "z": -1}
+      ],
+      "material": {
+        "color": {"r": 1, "g": 1, "b": 1},
+        "reflectivity": 0
+      }
+    },
+    {
+      "type": "Triangle",
+      "position": [
+        {"x": 1, "y": 1, "z": -2},
+        {"x": -1, "y": -1, "z": -2},
+        {"x": 1, "y": -1, "z": -2}
+      ],
+      "material": {
+        "color": {"r": 1, "g": 1, "b": 1},
+        "reflectivity": 0
+      }
+    },
+    {
+      "type": "Triangle",
+      "position": [
+        {"x": 1, "y": 1, "z": -2},
+        {"x": -1, "y": 1, "z": -2},
+        {"x": -1, "y": -1, "z": -2}
+      ],
+      "material": {
+        "color": {"r": 1, "g": 1, "b": 1},
+        "reflectivity": 0
+      }
+    },
+    {
+      "type": "Triangle",
+      "position": [
+        {"x": -1, "y": 1, "z": -1},
+        {"x": -1, "y": 1, "z": -2},
+        {"x": 1, "y": 1, "z": -2}
+      ],
+      "material": {
+        "color": {"r": 1, "g": 1, "b": 1},
+        "reflectivity": 0
+      }
+    },
+    {
+      "type": "Triangle",
+      "position": [
+        {"x": 1, "y": 1, "z": -2},
+        {"x": 1, "y": 1, "z": -1},
+        {"x": -1, "y": 1, "z": -1}
+      ],
+      "material": {
+        "color": {"r": 1, "g": 1, "b": 1},
+        "reflectivity": 0
+      }
+    }
+  ],
+  "lights": [
+    {
+      "type": "PointLight",
+      "position": {"x": -0.7, "y": 0.9, "z": -1.3},
+      "color": {"r": 1, "g": 1, "b": 1},
+      "intensity": 0.5
+    },
+    {
+      "type": "PointLight",
+      "position": {"x": 0.7, "y": 0.9, "z": -1.3},
+      "color": {"r": 1, "g": 1, "b": 1},
+      "intensity": 0.5
+    }
+  ]
+}

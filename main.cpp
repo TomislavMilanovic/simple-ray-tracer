@@ -581,11 +581,13 @@ int main(int argc, char *argv[])
 
     clock_gettime(CLOCK_MONOTONIC, &start);
     const std::vector<std::string> img_part = scene->string_render(start_row, end_row);
+    std::cout << "COLOR LIST START" << std::endl;
     for(int i = 0; i < img_part.size(); ++i)
     {
         std::cout << img_part[i];
     }
     //scene->render();
+    std::cout << "COLOR LIST END" << std::endl;
     clock_gettime(CLOCK_MONOTONIC, &finish);
 
     elapsed = (finish.tv_sec - start.tv_sec);
