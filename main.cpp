@@ -95,17 +95,18 @@ void CornellBoxScene_Normal(Scene& scene)
     scene.addAreaLightUniform(0.1f);
     //scene.addAreaLightRandom(2);
 }
-void CornellBoxScene_AABB(Scene& scene)
+void CornellBoxScene_AABB(Scene& scene, const std::string path)
 {
-    const Texture earth_texture = generate_texture("textures/world.topo.bathy.200412.3x5400x2700.png");
+    std::cout << "On dobiva " << path + "textures/world.topo.bathy.200412.3x5400x2700.png" << std::endl;
+    const Texture earth_texture = generate_texture(path + "textures/world.topo.bathy.200412.3x5400x2700.png");
     const SphereTextureMap* sphere_earth = new SphereTextureMap(earth_texture);
 
-    Texture height_map = generate_texture("textures/maps/Heightmap.png");
-    SphereDisplacementMap* sphere_heightmap = new SphereDisplacementMap(height_map, 0.05f, 0.001f, 0.01f);
+    /*Texture height_map = generate_texture("textures/maps/Heightmap.png");
+    SphereDisplacementMap* sphere_heightmap = new SphereDisplacementMap(height_map, 0.05f, 0.001f, 0.01f);*/
 
     SolidObjects objs;
 
-    objs.push_back(new Sphere(Vector3f(0.0f, -0.65f, -1.55f), 0.3f, Material(Color(0.0f, 1.0f, 1.0f), 0.5f), *sphere_heightmap));
+    objs.push_back(new Sphere(Vector3f(0.0f, -0.65f, -1.55f), 0.3f, Material(Color(0.0f, 1.0f, 1.0f), 0.5f), *sphere_earth));
 
     const float wall_factor = -2.0f;
     //left wall
@@ -382,7 +383,6 @@ void BVHScene_WithoutAABB(Scene& scene)
 
     scene.addAreaLightUniform(0.08f);
 }
-
 void BVHScene_WithAABB(Scene& scene)
 {
     SolidObjects objs;
@@ -472,26 +472,41 @@ void BVHScene_WithAABB(Scene& scene)
     scene.addAreaLightUniform(0.08f);
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+    if(argc != 4)
+    {
+        std::cout << "Invalid number of arguments!" << std::endl;
+        std::cout << "Usage: ./simpleraytracer relative_path_to_input start_row end_row" << std::endl;
+        return 1;
+    }
+
+    std::string path = argv[1];
+    int start_row = std::stoi(argv[2]);
+    int end_row = std::stoi(argv[3]);
+
     const glm::uint16 width = 400, height = 400, level = 15;
 
     Scene::ProjectionInfo proj_info(false);
-    Scene scene(width, height, level, 2, "BVHScene_WithAABB2", Scene::png, proj_info);
+    Scene scene(width, height, level, 2, "BVHScene_WithAABB22", Scene::png, proj_info);
 
-    //CornellBoxScene_AABB(scene);
+    CornellBoxScene_AABB(scene, path);
     //CornellBoxScene_WithoutAABB(scene);
     //CornellBoxScene_Normal(scene);
     //OldScene(scene);
 
     //BVHScene_WithoutAABB(scene);
-    BVHScene_WithAABB(scene);
+    //BVHScene_WithAABB(scene);
 
     struct timespec start, finish;
     double elapsed;
 
     clock_gettime(CLOCK_MONOTONIC, &start);
-    scene.render();
+    const std::vector<std::string> img_part = scene.string_render(start_row, end_row);
+    for(int i = 0; i < img_part.size(); ++i)
+    {
+        std::cout << img_part[i];
+    }
     clock_gettime(CLOCK_MONOTONIC, &finish);
 
     elapsed = (finish.tv_sec - start.tv_sec);

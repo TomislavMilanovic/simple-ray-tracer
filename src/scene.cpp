@@ -265,6 +265,28 @@ namespace raytracer
         img.clear();
         debugString(filename + " saved.");
     }
+
+    std::vector<std::string> Scene::string_render(const int start_row, const int end_row)
+    {
+        std::vector<std::string> img_part;
+
+        for(int y = start_row; y < end_row; ++y)
+        {
+            for(int x = 0; x < width; ++x)
+            {
+                const Ray r = (this->*rays_func)(y, x);
+                const Color color = (this->*aa_func)(r);
+                const std::string string_color =
+                        std::to_string(color.r) + "," +
+                        std::to_string(color.g) + "," +
+                        std::to_string(color.b) + "\n";
+                img_part.push_back(string_color);
+            }
+        }
+
+        return img_part;
+    }
+
     bool Scene::getClosestIntersection(const Ray& r, Intersection& closestIntersection) const
     {
         intersectionList list;

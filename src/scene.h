@@ -68,6 +68,7 @@ namespace raytracer
         void addAreaLightUniform(const float &step);
 
         void render();
+        std::vector<std::string> string_render(int start_row, int end_row);
 
         const glm::uint16& get_antialiasing() const;
         void set_antialiasing(const glm::uint16 aa);
