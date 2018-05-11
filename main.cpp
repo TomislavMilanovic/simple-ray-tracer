@@ -3,9 +3,13 @@
 #include "src/utils.h"
 #include "time.h"
 #include <iostream>
+#include <fstream>
 #include <ctime>
 
+#include <nlohmann/json.hpp>
+
 using namespace raytracer;
+using json = nlohmann::json;
 
 void CornellBoxScene_Normal(Scene& scene)
 {
@@ -97,7 +101,6 @@ void CornellBoxScene_Normal(Scene& scene)
 }
 void CornellBoxScene_AABB(Scene& scene, const std::string path)
 {
-    std::cout << "On dobiva " << path + "textures/world.topo.bathy.200412.3x5400x2700.png" << std::endl;
     const Texture earth_texture = generate_texture(path + "textures/world.topo.bathy.200412.3x5400x2700.png");
     const SphereTextureMap* sphere_earth = new SphereTextureMap(earth_texture);
 
@@ -472,6 +475,77 @@ void BVHScene_WithAABB(Scene& scene)
     scene.addAreaLightUniform(0.08f);
 }
 
+const Scene* buildSceneWithJSON(const json& scene_json, const std::string& path)
+{
+    const glm::uint16
+            width = scene_json["settings"]["width"],
+            height = scene_json["settings"]["height"],
+            level = scene_json["settings"]["level"],
+            antialiasing = scene_json["settings"]["antialiasing"];
+
+    Scene::ProjectionInfo* proj_info = new Scene::ProjectionInfo(false);
+    Scene* scene = new Scene(width, height, level, antialiasing, "TEST", Scene::png, *proj_info);
+    SolidObjects* objs = new SolidObjects();
+
+    for(int i = 0; i < scene_json["objects"].size(); ++i)
+    {
+        if(scene_json["objects"][i]["type"] == "Sphere")
+        {
+            const Texture earth_texture = generate_texture(path + scene_json["objects"][i]["texture"].get<std::string>());
+            const SphereTextureMap* sphere_earth = new SphereTextureMap(earth_texture);
+
+            objs->push_back(new Sphere(Vector3f(
+                                          scene_json["objects"][i]["position"]["x"],
+                                          scene_json["objects"][i]["position"]["y"],
+                                          scene_json["objects"][i]["position"]["z"]),
+                                          scene_json["objects"][i]["radius"],
+                            Material(Color(
+                                         scene_json["objects"][i]["material"]["color"]["r"],
+                                         scene_json["objects"][i]["material"]["color"]["g"],
+                                         scene_json["objects"][i]["material"]["color"]["b"]),
+                                         scene_json["objects"][i]["material"]["reflectivity"]), *sphere_earth));
+        }
+        else if(scene_json["objects"][i]["type"] == "Triangle")
+        {
+            objs->push_back(new Triangle(
+                               Vector3f(scene_json["objects"][i]["position"][0]["x"],
+                                        scene_json["objects"][i]["position"][0]["y"],
+                                        scene_json["objects"][i]["position"][0]["z"]),
+                               Vector3f(scene_json["objects"][i]["position"][1]["x"],
+                                        scene_json["objects"][i]["position"][1]["y"],
+                                        scene_json["objects"][i]["position"][1]["z"]),
+                               Vector3f(scene_json["objects"][i]["position"][2]["x"],
+                                        scene_json["objects"][i]["position"][2]["y"],
+                                        scene_json["objects"][i]["position"][2]["z"]),
+                               Material(Color(
+                                        scene_json["objects"][i]["material"]["color"]["r"],
+                                        scene_json["objects"][i]["material"]["color"]["g"],
+                                        scene_json["objects"][i]["material"]["color"]["b"]),
+                                        scene_json["objects"][i]["material"]["reflectivity"])
+                                        ));
+        }
+    }
+
+    scene->objects.push_back(new AABB(*objs));
+
+    for(int i = 0; i < scene_json["lights"].size(); ++i)
+    {
+        if(scene_json["lights"][i]["type"] == "PointLight")
+        {
+            scene->lights.push_back(new PointLight(
+                                       Vector3f(scene_json["lights"][i]["position"]["x"],
+                                                scene_json["lights"][i]["position"]["y"],
+                                                scene_json["lights"][i]["position"]["z"]),
+                                       Color(scene_json["lights"][i]["color"]["r"],
+                                             scene_json["lights"][i]["color"]["g"],
+                                             scene_json["lights"][i]["color"]["b"]),
+                                       scene_json["lights"][i]["intensity"]));
+        }
+    }
+
+    return scene;
+}
+
 int main(int argc, char *argv[])
 {
     if(argc != 4)
@@ -485,12 +559,16 @@ int main(int argc, char *argv[])
     int start_row = std::stoi(argv[2]);
     int end_row = std::stoi(argv[3]);
 
-    const glm::uint16 width = 400, height = 400, level = 15;
+    std::ifstream scene_file(path + "scene.json");
+    json scene_json;
+    scene_file >> scene_json;
 
-    Scene::ProjectionInfo proj_info(false);
-    Scene scene(width, height, level, 2, "BVHScene_WithAABB22", Scene::png, proj_info);
+    //std::string s = scene_json.dump();
+    //std::cout << "JSON: " << s << std::endl;
 
-    CornellBoxScene_AABB(scene, path);
+    Scene* scene = buildSceneWithJSON(scene_json, path);
+
+    //CornellBoxScene_AABB(scene, path);
     //CornellBoxScene_WithoutAABB(scene);
     //CornellBoxScene_Normal(scene);
     //OldScene(scene);
@@ -502,11 +580,12 @@ int main(int argc, char *argv[])
     double elapsed;
 
     clock_gettime(CLOCK_MONOTONIC, &start);
-    const std::vector<std::string> img_part = scene.string_render(start_row, end_row);
+    const std::vector<std::string> img_part = scene->string_render(start_row, end_row);
     for(int i = 0; i < img_part.size(); ++i)
     {
         std::cout << img_part[i];
     }
+    //scene->render();
     clock_gettime(CLOCK_MONOTONIC, &finish);
 
     elapsed = (finish.tv_sec - start.tv_sec);
