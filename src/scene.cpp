@@ -277,9 +277,9 @@ namespace raytracer
                 const Ray r = (this->*rays_func)(y, x);
                 const Color color = (this->*aa_func)(r);
                 const std::string string_color =
-                        std::to_string(color.r) + "," +
-                        std::to_string(color.g) + "," +
-                        std::to_string(color.b) + "\n";
+                        std::to_string((int)floor(color.r)) + "," +
+                        std::to_string((int)floor(color.g)) + "," +
+                        std::to_string((int)floor(color.b)) + "\n";
                 img_part.push_back(string_color);
             }
         }
