@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <ctime>
+#include <string>
 
 #include <nlohmann/json.hpp>
 
@@ -475,7 +476,7 @@ void BVHScene_WithAABB(Scene& scene)
     scene.addAreaLightUniform(0.08f);
 }
 
-const Scene* buildSceneWithJSON(const json& scene_json, const std::string& path)
+const Scene* buildSceneWithJSON(const json& scene_json)
 {
     const glm::uint16
             width = scene_json["settings"]["width"],
@@ -491,8 +492,9 @@ const Scene* buildSceneWithJSON(const json& scene_json, const std::string& path)
     {
         if(scene_json["objects"][i]["type"] == "Sphere")
         {
-            const Texture earth_texture = generate_texture(path + scene_json["objects"][i]["texture"].get<std::string>());
-            const SphereTextureMap* sphere_earth = new SphereTextureMap(earth_texture);
+            //debugString(scene_json["objects"][i]["texture"].get<std::string>());
+            //const Texture earth_texture = generate_texture(scene_json["objects"][i]["texture"].get<std::string>());
+            //const SphereTextureMap* sphere_earth = new SphereTextureMap(earth_texture);
 
             objs->push_back(new Sphere(Vector3f(
                                           scene_json["objects"][i]["position"]["x"],
@@ -503,7 +505,7 @@ const Scene* buildSceneWithJSON(const json& scene_json, const std::string& path)
                                          scene_json["objects"][i]["material"]["color"]["r"],
                                          scene_json["objects"][i]["material"]["color"]["g"],
                                          scene_json["objects"][i]["material"]["color"]["b"]),
-                                         scene_json["objects"][i]["material"]["reflectivity"]), *sphere_earth));
+                                         scene_json["objects"][i]["material"]["reflectivity"])/*, *sphere_earth*/));
         }
         else if(scene_json["objects"][i]["type"] == "Triangle")
         {
@@ -546,9 +548,23 @@ const Scene* buildSceneWithJSON(const json& scene_json, const std::string& path)
     return scene;
 }
 
+template<typename Out>
+void split(const std::string &s, char delim, Out result) {
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        *(result++) = item;
+    }
+}
+
+std::vector<std::string> split(const std::string &s, char delim) {
+    std::vector<std::string> elems;
+    split(s, delim, std::back_inserter(elems));
+    return elems;
+}
 int main(int argc, char *argv[])
 {
-    if(argc != 4)
+   /* if(argc != 4)
     {
         std::cout << "Invalid number of arguments!" << std::endl;
         std::cout << "Usage: ./simpleraytracer relative_path_to_input start_row end_row" << std::endl;
@@ -557,16 +573,31 @@ int main(int argc, char *argv[])
 
     std::string path = argv[1];
     int start_row = std::stoi(argv[2]);
-    int end_row = std::stoi(argv[3]);
+    int end_row = std::stoi(argv[3]);*/
 
-    std::ifstream scene_file(path + "scene.json");
-    json scene_json;
-    scene_file >> scene_json;
+    int start_row = std::stoi("0");
+    int end_row = std::stoi("200");
+
+    for (std::string line; std::getline(std::cin, line);)
+    {
+        debugString("STDIN " + line);
+
+        std::vector<std::string> splitted = split(line, ',');
+
+        start_row = std::stoi(splitted[0]);
+        end_row = std::stoi(splitted[1]);
+    }
+
+    //std::vector<std::string> splitted = split(input_line, ',');
+
+    //std::ifstream scene_file("scene.json");
+    json scene_json = "{\"settings\":{\"width\":400,\"height\":400,\"level\":15,\"antialiasing\":2},\"objects\":[{\"type\":\"Sphere\",\"position\":{\"x\":0,\"y\":-0.65,\"z\":-1.55},\"radius\":0.3,\"material\":{\"color\":{\"r\":0,\"g\":1,\"b\":1},\"reflectivity\":0.5},\"texture\":\"world.topo.bathy.200412.3x5400x2700.png\"},{\"type\":\"Triangle\",\"position\":[{\"x\":-1,\"y\":1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-1},{\"x\":-1,\"y\":-1,\"z\":-2}],\"material\":{\"color\":{\"r\":1,\"g\":0,\"b\":0},\"reflectivity\":1}},{\"type\":\"Triangle\",\"position\":[{\"x\":-1,\"y\":1,\"z\":-2},{\"x\":-1,\"y\":1,\"z\":-1},{\"x\":-1,\"y\":-1,\"z\":-1}],\"material\":{\"color\":{\"r\":1,\"g\":0,\"b\":0},\"reflectivity\":1}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":1,\"z\":-2},{\"x\":1,\"y\":-1,\"z\":-2},{\"x\":1,\"y\":-1,\"z\":-1}],\"material\":{\"color\":{\"r\":0,\"g\":1,\"b\":0},\"reflectivity\":0.3}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":1,\"z\":-2},{\"x\":1,\"y\":-1,\"z\":-1},{\"x\":1,\"y\":1,\"z\":-1}],\"material\":{\"color\":{\"r\":0,\"g\":1,\"b\":0},\"reflectivity\":0.3}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":-1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-1}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":-1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-1},{\"x\":1,\"y\":-1,\"z\":-1}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-2},{\"x\":1,\"y\":-1,\"z\":-2}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":1,\"z\":-2},{\"x\":-1,\"y\":1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-2}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}},{\"type\":\"Triangle\",\"position\":[{\"x\":-1,\"y\":1,\"z\":-1},{\"x\":-1,\"y\":1,\"z\":-2},{\"x\":1,\"y\":1,\"z\":-2}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":1,\"z\":-2},{\"x\":1,\"y\":1,\"z\":-1},{\"x\":-1,\"y\":1,\"z\":-1}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}}],\"lights\":[{\"type\":\"PointLight\",\"position\":{\"x\":-0.7,\"y\":0.9,\"z\":-1.3},\"color\":{\"r\":1,\"g\":1,\"b\":1},\"intensity\":0.5},{\"type\":\"PointLight\",\"position\":{\"x\":0.7,\"y\":0.9,\"z\":-1.3},\"color\":{\"r\":1,\"g\":1,\"b\":1},\"intensity\":0.5}]}"_json;
+    //scene_file >> scene_json;
 
     //std::string s = scene_json.dump();
     //std::cout << "JSON: " << s << std::endl;
 
-    Scene* scene = buildSceneWithJSON(scene_json, path);
+    Scene* scene = buildSceneWithJSON(scene_json);
 
     //CornellBoxScene_AABB(scene, path);
     //CornellBoxScene_WithoutAABB(scene);
@@ -584,7 +615,7 @@ int main(int argc, char *argv[])
     std::cout << "COLOR LIST START" << std::endl;
     for(int i = 0; i < img_part.size(); ++i)
     {
-        std::cout << img_part[i];
+        std::cout << start_row + i << <<    img_part[i]  << "\n";
     }
     //scene->render();
     std::cout << "COLOR LIST END" << std::endl;

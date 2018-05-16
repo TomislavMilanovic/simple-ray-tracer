@@ -279,7 +279,7 @@ namespace raytracer
                 const std::string string_color =
                         std::to_string((int)floor(color.r)) + "," +
                         std::to_string((int)floor(color.g)) + "," +
-                        std::to_string((int)floor(color.b)) + "\n";
+                        std::to_string((int)floor(color.b));
                 img_part.push_back(string_color);
             }
         }
