@@ -392,7 +392,7 @@ namespace raytracer
            {
                if(!first_pass)
                {
-                   debugString("Unable to build AABB tree from all input objects. Maybe three or more objects have the same centroid?");
+                   //debugString("Unable to build AABB tree from all input objects. Maybe three or more objects have the same centroid?");
                    return;
                }
                subset_1.clear();

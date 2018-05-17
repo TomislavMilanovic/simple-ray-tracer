@@ -12,15 +12,18 @@ if __name__ == '__main__':
 
     content = [x.strip() for x in content]
 
-    width = int(content.pop(0))
-    height = int(content.pop(0))
+    first_element = content.pop(0)
+    first_element = (first_element.split(' '))[1].split(',')
+    width = int(first_element[0])
+    height = int(first_element[1])
 
     pixel_data = []
     i = 0
     im = Image.new('RGB', (width, height))
 
     for line in content:
-        pixel = tuple(map(int, line.split(',')))
+        line = line.split(' ')
+        pixel = tuple(map(int, line[1].split(',')))
         pixel_data.append(pixel)
         i += 1
         if i == width:

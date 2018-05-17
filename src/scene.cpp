@@ -21,7 +21,7 @@ namespace raytracer
                 for(float z = wall_factor + 0.25f; z < -1.25f; z += step)
                     points.push_back(Vector3f(x, y, z));
 
-        debugFloat(points.size(), "Number of point lights:");
+        //debugFloat(points.size(), "Number of point lights:");
 
         for(unsigned i = 0; i < points.size(); ++i)
             lights.push_back(new RealisticPointLight(points[i], Color(1.0f, 1.0f, 1.0f), 14.0f / points.size(), 1.0f));
@@ -248,7 +248,7 @@ namespace raytracer
 
     void Scene::render()
     {
-        debugString("Render started.");
+        //debugString("Render started.");
         img.resize(width * height);
 
         for(int y = 0; y < height; ++y)
@@ -263,7 +263,7 @@ namespace raytracer
         (this->*output_func)();
 
         img.clear();
-        debugString(filename + " saved.");
+        //debugString(filename + " saved.");
     }
 
     std::vector<std::string> Scene::string_render(const int start_row, const int end_row)

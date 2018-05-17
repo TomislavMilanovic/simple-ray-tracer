@@ -564,34 +564,25 @@ std::vector<std::string> split(const std::string &s, char delim) {
 }
 int main(int argc, char *argv[])
 {
-   /* if(argc != 4)
+    int start_row;
+    int end_row;
+
+    /*for (std::string line; std::getline(std::cin, line);)
     {
-        std::cout << "Invalid number of arguments!" << std::endl;
-        std::cout << "Usage: ./simpleraytracer relative_path_to_input start_row end_row" << std::endl;
-        return 1;
-    }
+        //debugString("STDIN " + line);
 
-    std::string path = argv[1];
-    int start_row = std::stoi(argv[2]);
-    int end_row = std::stoi(argv[3]);*/
+        std::vector<std::string> splitted = split(line, '\t');
+        std::vector<std::string> splitted2 = split(splitted[1], ',');
 
-    int start_row = std::stoi("0");
-    int end_row = std::stoi("200");
+        start_row = std::stoi(splitted2[0]);
+        end_row = std::stoi(splitted2[1]);
+    }*/
 
-    for (std::string line; std::getline(std::cin, line);)
-    {
-        debugString("STDIN " + line);
-
-        std::vector<std::string> splitted = split(line, ',');
-
-        start_row = std::stoi(splitted[0]);
-        end_row = std::stoi(splitted[1]);
-    }
-
-    //std::vector<std::string> splitted = split(input_line, ',');
+    start_row = 0;
+    end_row = 1599;
 
     //std::ifstream scene_file("scene.json");
-    json scene_json = "{\"settings\":{\"width\":400,\"height\":400,\"level\":15,\"antialiasing\":2},\"objects\":[{\"type\":\"Sphere\",\"position\":{\"x\":0,\"y\":-0.65,\"z\":-1.55},\"radius\":0.3,\"material\":{\"color\":{\"r\":0,\"g\":1,\"b\":1},\"reflectivity\":0.5},\"texture\":\"world.topo.bathy.200412.3x5400x2700.png\"},{\"type\":\"Triangle\",\"position\":[{\"x\":-1,\"y\":1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-1},{\"x\":-1,\"y\":-1,\"z\":-2}],\"material\":{\"color\":{\"r\":1,\"g\":0,\"b\":0},\"reflectivity\":1}},{\"type\":\"Triangle\",\"position\":[{\"x\":-1,\"y\":1,\"z\":-2},{\"x\":-1,\"y\":1,\"z\":-1},{\"x\":-1,\"y\":-1,\"z\":-1}],\"material\":{\"color\":{\"r\":1,\"g\":0,\"b\":0},\"reflectivity\":1}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":1,\"z\":-2},{\"x\":1,\"y\":-1,\"z\":-2},{\"x\":1,\"y\":-1,\"z\":-1}],\"material\":{\"color\":{\"r\":0,\"g\":1,\"b\":0},\"reflectivity\":0.3}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":1,\"z\":-2},{\"x\":1,\"y\":-1,\"z\":-1},{\"x\":1,\"y\":1,\"z\":-1}],\"material\":{\"color\":{\"r\":0,\"g\":1,\"b\":0},\"reflectivity\":0.3}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":-1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-1}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":-1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-1},{\"x\":1,\"y\":-1,\"z\":-1}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-2},{\"x\":1,\"y\":-1,\"z\":-2}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":1,\"z\":-2},{\"x\":-1,\"y\":1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-2}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}},{\"type\":\"Triangle\",\"position\":[{\"x\":-1,\"y\":1,\"z\":-1},{\"x\":-1,\"y\":1,\"z\":-2},{\"x\":1,\"y\":1,\"z\":-2}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":1,\"z\":-2},{\"x\":1,\"y\":1,\"z\":-1},{\"x\":-1,\"y\":1,\"z\":-1}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}}],\"lights\":[{\"type\":\"PointLight\",\"position\":{\"x\":-0.7,\"y\":0.9,\"z\":-1.3},\"color\":{\"r\":1,\"g\":1,\"b\":1},\"intensity\":0.5},{\"type\":\"PointLight\",\"position\":{\"x\":0.7,\"y\":0.9,\"z\":-1.3},\"color\":{\"r\":1,\"g\":1,\"b\":1},\"intensity\":0.5}]}"_json;
+    json scene_json = "{\"settings\":{\"width\":1600,\"height\":1600,\"level\":15,\"antialiasing\":2},\"objects\":[{\"type\":\"Sphere\",\"position\":{\"x\":0,\"y\":-0.65,\"z\":-1.55},\"radius\":0.3,\"material\":{\"color\":{\"r\":0,\"g\":1,\"b\":1},\"reflectivity\":0.5},\"texture\":\"world.topo.bathy.200412.3x5400x2700.png\"},{\"type\":\"Triangle\",\"position\":[{\"x\":-1,\"y\":1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-1},{\"x\":-1,\"y\":-1,\"z\":-2}],\"material\":{\"color\":{\"r\":1,\"g\":0,\"b\":0},\"reflectivity\":1}},{\"type\":\"Triangle\",\"position\":[{\"x\":-1,\"y\":1,\"z\":-2},{\"x\":-1,\"y\":1,\"z\":-1},{\"x\":-1,\"y\":-1,\"z\":-1}],\"material\":{\"color\":{\"r\":1,\"g\":0,\"b\":0},\"reflectivity\":1}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":1,\"z\":-2},{\"x\":1,\"y\":-1,\"z\":-2},{\"x\":1,\"y\":-1,\"z\":-1}],\"material\":{\"color\":{\"r\":0,\"g\":1,\"b\":0},\"reflectivity\":0.3}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":1,\"z\":-2},{\"x\":1,\"y\":-1,\"z\":-1},{\"x\":1,\"y\":1,\"z\":-1}],\"material\":{\"color\":{\"r\":0,\"g\":1,\"b\":0},\"reflectivity\":0.3}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":-1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-1}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":-1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-1},{\"x\":1,\"y\":-1,\"z\":-1}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-2},{\"x\":1,\"y\":-1,\"z\":-2}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":1,\"z\":-2},{\"x\":-1,\"y\":1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-2}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}},{\"type\":\"Triangle\",\"position\":[{\"x\":-1,\"y\":1,\"z\":-1},{\"x\":-1,\"y\":1,\"z\":-2},{\"x\":1,\"y\":1,\"z\":-2}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":1,\"z\":-2},{\"x\":1,\"y\":1,\"z\":-1},{\"x\":-1,\"y\":1,\"z\":-1}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}}],\"lights\":[{\"type\":\"PointLight\",\"position\":{\"x\":-0.7,\"y\":0.9,\"z\":-1.3},\"color\":{\"r\":1,\"g\":1,\"b\":1},\"intensity\":0.5},{\"type\":\"PointLight\",\"position\":{\"x\":0.7,\"y\":0.9,\"z\":-1.3},\"color\":{\"r\":1,\"g\":1,\"b\":1},\"intensity\":0.5}]}"_json;
     //scene_file >> scene_json;
 
     //std::string s = scene_json.dump();
@@ -612,13 +603,27 @@ int main(int argc, char *argv[])
 
     clock_gettime(CLOCK_MONOTONIC, &start);
     const std::vector<std::string> img_part = scene->string_render(start_row, end_row);
-    std::cout << "COLOR LIST START" << std::endl;
+    const int width = scene_json["settings"]["width"];
+    const int height = scene_json["settings"]["height"];
+
+    if(start_row == 0)
+    {
+        std::cout << "-1" << " " << width << "," << height << "\n";
+    }
+
+    int a = start_row;
+    int b = 0;
     for(int i = 0; i < img_part.size(); ++i)
     {
-        std::cout << start_row + i << <<    img_part[i]  << "\n";
+        std::cout << a*width + b << " " << img_part[i] << "\n";
+        ++b;
+        if(b == width)
+        {
+            b = 0;
+            ++a;
+        }
+        //std::cout << start_row * width + i << " " << img_part[i] << "\n";
     }
-    //scene->render();
-    std::cout << "COLOR LIST END" << std::endl;
     clock_gettime(CLOCK_MONOTONIC, &finish);
 
     elapsed = (finish.tv_sec - start.tv_sec);
