@@ -15,8 +15,8 @@ namespace raytracer
 
         unsigned error = lodepng::decode(image, w, h, buffer);
 
-        /*if(error) std::cout << "Error while loading texture!" << error << std::endl;
-        else std::cout << "Texture " << filename << " loaded." << std::endl;*/
+        if(error) std::cout << "Error while loading texture!" << error << std::endl;
+        else std::cout << "Texture " << filename << " loaded." << std::endl;
 
         std::vector<Color>* new_texture = new std::vector<Color>(w * h);
         std::vector<Color> &texture = *new_texture;

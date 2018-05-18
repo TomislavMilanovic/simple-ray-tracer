@@ -2,12 +2,13 @@ bin/hadoop jar share/hadoop/tools/lib/hadoop-streaming-2.7.6.jar \
 -Dmapreduce.job.output.key.comparator.class=org.apache.hadoop.mapreduce.lib.partition.KeyFieldBasedComparator \
 -Dmapreduce.partition.keycomparator.options=-n \
 -Dmapreduce.input.lineinputformat.linespermap=1 \
--input /render/input_test/testInput.txt \
--output /output10 \
+-files hdfs://localhost:9000/render/render_input_test/scene.json,hdfs://localhost:9000/render/render_input_test/textures/earth.png \
+-input /render/render_input_test/testInput.txt \
+-output /render/output7 \
 -file /home/tomislav/Desktop/simple-ray-tracer/cmake-build-debug/simple_ray_tracer \
 -mapper /home/tomislav/Desktop/simple-ray-tracer/cmake-build-debug/simple_ray_tracer \
--file /home/tomislav/Desktop/simple-ray-tracer/mapreduce/render_input_test/simple_ray_tracer_reducer.py \
--reducer /home/tomislav/Desktop/simple-ray-tracer/mapreduce/render_input_test/simple_ray_tracer_reducer.py \
+-file /home/tomislav/Desktop/simple-ray-tracer/mapreduce/simple_ray_tracer_reducer.py \
+-reducer /home/tomislav/Desktop/simple-ray-tracer/mapreduce/simple_ray_tracer_reducer.py \
 -inputformat org.apache.hadoop.mapred.lib.NLineInputFormat
 
 bin/hadoop jar share/hadoop/tools/lib/hadoop-streaming-2.7.6.jar \

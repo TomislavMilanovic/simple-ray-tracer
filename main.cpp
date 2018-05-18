@@ -2,6 +2,7 @@
 #include "src/scene.h"
 #include "src/utils.h"
 #include "time.h"
+#include "lib/lodepng/lodepng.h"
 #include <iostream>
 #include <fstream>
 #include <ctime>
@@ -492,9 +493,8 @@ const Scene* buildSceneWithJSON(const json& scene_json)
     {
         if(scene_json["objects"][i]["type"] == "Sphere")
         {
-            //debugString(scene_json["objects"][i]["texture"].get<std::string>());
-            //const Texture earth_texture = generate_texture(scene_json["objects"][i]["texture"].get<std::string>());
-            //const SphereTextureMap* sphere_earth = new SphereTextureMap(earth_texture);
+            const Texture earth_texture = generate_texture(scene_json["objects"][i]["texture"].get<std::string>());
+            const SphereTextureMap* sphere_earth = new SphereTextureMap(earth_texture);
 
             objs->push_back(new Sphere(Vector3f(
                                           scene_json["objects"][i]["position"]["x"],
@@ -505,7 +505,7 @@ const Scene* buildSceneWithJSON(const json& scene_json)
                                          scene_json["objects"][i]["material"]["color"]["r"],
                                          scene_json["objects"][i]["material"]["color"]["g"],
                                          scene_json["objects"][i]["material"]["color"]["b"]),
-                                         scene_json["objects"][i]["material"]["reflectivity"])/*, *sphere_earth*/));
+                                         scene_json["objects"][i]["material"]["reflectivity"]), *sphere_earth));
         }
         else if(scene_json["objects"][i]["type"] == "Triangle")
         {
@@ -567,7 +567,8 @@ int main(int argc, char *argv[])
     int start_row;
     int end_row;
 
-    /*for (std::string line; std::getline(std::cin, line);)
+
+    for (std::string line; std::getline(std::cin, line);)
     {
         //debugString("STDIN " + line);
 
@@ -576,14 +577,12 @@ int main(int argc, char *argv[])
 
         start_row = std::stoi(splitted2[0]);
         end_row = std::stoi(splitted2[1]);
-    }*/
+    }
 
-    start_row = 0;
-    end_row = 1599;
-
-    //std::ifstream scene_file("scene.json");
-    json scene_json = "{\"settings\":{\"width\":1600,\"height\":1600,\"level\":15,\"antialiasing\":2},\"objects\":[{\"type\":\"Sphere\",\"position\":{\"x\":0,\"y\":-0.65,\"z\":-1.55},\"radius\":0.3,\"material\":{\"color\":{\"r\":0,\"g\":1,\"b\":1},\"reflectivity\":0.5},\"texture\":\"world.topo.bathy.200412.3x5400x2700.png\"},{\"type\":\"Triangle\",\"position\":[{\"x\":-1,\"y\":1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-1},{\"x\":-1,\"y\":-1,\"z\":-2}],\"material\":{\"color\":{\"r\":1,\"g\":0,\"b\":0},\"reflectivity\":1}},{\"type\":\"Triangle\",\"position\":[{\"x\":-1,\"y\":1,\"z\":-2},{\"x\":-1,\"y\":1,\"z\":-1},{\"x\":-1,\"y\":-1,\"z\":-1}],\"material\":{\"color\":{\"r\":1,\"g\":0,\"b\":0},\"reflectivity\":1}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":1,\"z\":-2},{\"x\":1,\"y\":-1,\"z\":-2},{\"x\":1,\"y\":-1,\"z\":-1}],\"material\":{\"color\":{\"r\":0,\"g\":1,\"b\":0},\"reflectivity\":0.3}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":1,\"z\":-2},{\"x\":1,\"y\":-1,\"z\":-1},{\"x\":1,\"y\":1,\"z\":-1}],\"material\":{\"color\":{\"r\":0,\"g\":1,\"b\":0},\"reflectivity\":0.3}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":-1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-1}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":-1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-1},{\"x\":1,\"y\":-1,\"z\":-1}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-2},{\"x\":1,\"y\":-1,\"z\":-2}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":1,\"z\":-2},{\"x\":-1,\"y\":1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-2}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}},{\"type\":\"Triangle\",\"position\":[{\"x\":-1,\"y\":1,\"z\":-1},{\"x\":-1,\"y\":1,\"z\":-2},{\"x\":1,\"y\":1,\"z\":-2}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":1,\"z\":-2},{\"x\":1,\"y\":1,\"z\":-1},{\"x\":-1,\"y\":1,\"z\":-1}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}}],\"lights\":[{\"type\":\"PointLight\",\"position\":{\"x\":-0.7,\"y\":0.9,\"z\":-1.3},\"color\":{\"r\":1,\"g\":1,\"b\":1},\"intensity\":0.5},{\"type\":\"PointLight\",\"position\":{\"x\":0.7,\"y\":0.9,\"z\":-1.3},\"color\":{\"r\":1,\"g\":1,\"b\":1},\"intensity\":0.5}]}"_json;
-    //scene_file >> scene_json;
+    std::ifstream scene_file("scene.json");
+    //json scene_json = "{\"settings\":{\"width\":1600,\"height\":1600,\"level\":15,\"antialiasing\":2},\"objects\":[{\"type\":\"Sphere\",\"position\":{\"x\":0,\"y\":-0.65,\"z\":-1.55},\"radius\":0.3,\"material\":{\"color\":{\"r\":0,\"g\":1,\"b\":1},\"reflectivity\":0.5},\"texture\":\"world.topo.bathy.200412.3x5400x2700.png\"},{\"type\":\"Triangle\",\"position\":[{\"x\":-1,\"y\":1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-1},{\"x\":-1,\"y\":-1,\"z\":-2}],\"material\":{\"color\":{\"r\":1,\"g\":0,\"b\":0},\"reflectivity\":1}},{\"type\":\"Triangle\",\"position\":[{\"x\":-1,\"y\":1,\"z\":-2},{\"x\":-1,\"y\":1,\"z\":-1},{\"x\":-1,\"y\":-1,\"z\":-1}],\"material\":{\"color\":{\"r\":1,\"g\":0,\"b\":0},\"reflectivity\":1}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":1,\"z\":-2},{\"x\":1,\"y\":-1,\"z\":-2},{\"x\":1,\"y\":-1,\"z\":-1}],\"material\":{\"color\":{\"r\":0,\"g\":1,\"b\":0},\"reflectivity\":0.3}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":1,\"z\":-2},{\"x\":1,\"y\":-1,\"z\":-1},{\"x\":1,\"y\":1,\"z\":-1}],\"material\":{\"color\":{\"r\":0,\"g\":1,\"b\":0},\"reflectivity\":0.3}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":-1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-1}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":-1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-1},{\"x\":1,\"y\":-1,\"z\":-1}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-2},{\"x\":1,\"y\":-1,\"z\":-2}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":1,\"z\":-2},{\"x\":-1,\"y\":1,\"z\":-2},{\"x\":-1,\"y\":-1,\"z\":-2}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}},{\"type\":\"Triangle\",\"position\":[{\"x\":-1,\"y\":1,\"z\":-1},{\"x\":-1,\"y\":1,\"z\":-2},{\"x\":1,\"y\":1,\"z\":-2}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}},{\"type\":\"Triangle\",\"position\":[{\"x\":1,\"y\":1,\"z\":-2},{\"x\":1,\"y\":1,\"z\":-1},{\"x\":-1,\"y\":1,\"z\":-1}],\"material\":{\"color\":{\"r\":1,\"g\":1,\"b\":1},\"reflectivity\":0}}],\"lights\":[{\"type\":\"PointLight\",\"position\":{\"x\":-0.7,\"y\":0.9,\"z\":-1.3},\"color\":{\"r\":1,\"g\":1,\"b\":1},\"intensity\":0.5},{\"type\":\"PointLight\",\"position\":{\"x\":0.7,\"y\":0.9,\"z\":-1.3},\"color\":{\"r\":1,\"g\":1,\"b\":1},\"intensity\":0.5}]}"_json;
+    json scene_json;
+    scene_file >> scene_json;
 
     //std::string s = scene_json.dump();
     //std::cout << "JSON: " << s << std::endl;
@@ -622,14 +621,13 @@ int main(int argc, char *argv[])
             b = 0;
             ++a;
         }
-        //std::cout << start_row * width + i << " " << img_part[i] << "\n";
     }
     clock_gettime(CLOCK_MONOTONIC, &finish);
 
     elapsed = (finish.tv_sec - start.tv_sec);
     elapsed += (finish.tv_nsec - start.tv_nsec) / 1e9; //1e9
 
-    std::cout << "Elapsed time: " << elapsed << " s" << std::endl;
+    //std::cout << "Elapsed time: " << elapsed << " s" << std::endl;
 
     return 0;
 }
