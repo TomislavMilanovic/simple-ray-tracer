@@ -493,8 +493,8 @@ const Scene* buildSceneWithJSON(const json& scene_json)
     {
         if(scene_json["objects"][i]["type"] == "Sphere")
         {
-            const Texture earth_texture = generate_texture(scene_json["objects"][i]["texture"].get<std::string>());
-            const SphereTextureMap* sphere_earth = new SphereTextureMap(earth_texture);
+            ///const Texture earth_texture = generate_texture(scene_json["objects"][i]["texture"].get<std::string>());
+            //const SphereTextureMap* sphere_earth = new SphereTextureMap(earth_texture);
 
             objs->push_back(new Sphere(Vector3f(
                                           scene_json["objects"][i]["position"]["x"],
@@ -505,7 +505,7 @@ const Scene* buildSceneWithJSON(const json& scene_json)
                                          scene_json["objects"][i]["material"]["color"]["r"],
                                          scene_json["objects"][i]["material"]["color"]["g"],
                                          scene_json["objects"][i]["material"]["color"]["b"]),
-                                         scene_json["objects"][i]["material"]["reflectivity"]), *sphere_earth));
+                                         scene_json["objects"][i]["material"]["reflectivity"])/*, *sphere_earth*/));
         }
         else if(scene_json["objects"][i]["type"] == "Triangle")
         {
@@ -567,7 +567,6 @@ int main(int argc, char *argv[])
     int start_row;
     int end_row;
 
-
     for (std::string line; std::getline(std::cin, line);)
     {
         //debugString("STDIN " + line);
@@ -607,14 +606,14 @@ int main(int argc, char *argv[])
 
     if(start_row == 0)
     {
-        std::cout << "-1" << " " << width << "," << height << "\n";
+        std::cout << "-1" << "\t" << width << "," << height << "\n";
     }
 
     int a = start_row;
     int b = 0;
     for(int i = 0; i < img_part.size(); ++i)
     {
-        std::cout << a*width + b << " " << img_part[i] << "\n";
+        std::cout << a*width + b << "\t" << img_part[i] << "\n";
         ++b;
         if(b == width)
         {
