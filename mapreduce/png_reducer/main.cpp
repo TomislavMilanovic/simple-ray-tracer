@@ -56,7 +56,7 @@ void savepng(const std::vector<Color>& img, const int height, const int width)
     //std::string test(png.begin(), png.end());
     for(glm::uint16 i = 0; i < png.size(); ++i)
     {
-        std::cout << "\t" << (int)png[i] << "\n";
+        std::cout << i << "\t" << (int)png[i] << "\n";
     }
 
     //std::cout << test;
