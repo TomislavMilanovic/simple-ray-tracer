@@ -1,29 +1,17 @@
 # simple-ray-tracer
 A simple ray tracer in C++, using a OpenGL Math (glm) library
 
-##How to build
+## How to build
 
 1. Go to the directory with project files.
 2. Run "cmake CMakeLists.txt"
 3. Run "make"
 
-##Resources
+## Screenshots
 
-Simple ray tracer in C with explanation:
+<img src="https://raw.githubusercontent.com/TomislavMilanovic/simple-ray-tracer/master/screenshots/perspective_fov_80_aa_2.png">
 
-http://www.purplealienplanet.com/node/20 - part 1
-http://www.purplealienplanet.com/node/23 - part 2
+<img src="https://raw.githubusercontent.com/TomislavMilanovic/simple-ray-tracer/master/screenshots/BVHScene_WithAABB_247%2C362_lights_92.png">
 
-Code for working with files in C++:
-
-https://www.scratchapixel.com/code.php?id=3&origin=/lessons/3d-basic-rendering/introduction-to-ray-tracing
-
-Free book for Ray Tracing:
-
-http://www.cosinekitty.com/raytrace/contents.html
-
-Ray-plane intersection
-
-https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-plane-and-ray-disk-intersection
 
 
